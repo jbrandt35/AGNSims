@@ -223,6 +223,9 @@ def dump_record(outcome_record):
         json.dump(outcome_record, file)
 
 
-
-
+def check_binary_bound(sim, outcome_record):
+    if not is_bound(sim.particles["BBH_1"], sim.particles["BBH_2"]):
+        outcome_record["Result"] = "Unbound"
+        dump_record(outcome_record)
+        raise Exception
 

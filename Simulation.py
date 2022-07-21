@@ -11,8 +11,7 @@ sim = create_simulation()
 
 w = populate_simulation(sim, perturber_a = perturber_a, binary_separation = binary_separation)
 
-binary_period = get_binary_period(sim)
-SMBH_period = get_SMBH_period(sim)
+binary_period, SMBH_period = get_binary_period(sim), get_SMBH_period(sim)
 sim.dt = 0.05 * binary_period
 
 #####################################################################################
@@ -148,14 +147,10 @@ while sim.t <= 10**5 * SMBH_period:
         plt.savefig("plots/DistPerturbm1b.jpg", bbox_inches = "tight")
         plt.close()
 
-    if not is_bound(sim.particles["BBH_1"], sim.particles["BBH_2"]):
-        outcome_record["Result"] = "Unbound"
-        dump_record(outcome_record)
-        raise Exception
-
-    #---------------Check for Collisions------------------------------#
+    # ---------------Check for Boundedness of Binary------------------------------#
+    check_binary_bound(sim, outcome_record)
+    #---------------Check for Collisions------------------------------------------#
     check_for_collisions(sim, w, outcome_record)
-    #---------------Check for Boundedness of Binary------------------------------#
 
     sim.steps(1)
     total_time_steps_completed += 1
