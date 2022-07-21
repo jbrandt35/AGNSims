@@ -2,8 +2,8 @@ import numpy as np
 from Tools import *
 import matplotlib.pyplot as plt
 
-perturber_a = 4
-binary_separation = 0.3
+perturber_a = PERTSEPARATION
+binary_separation = BINSEPARATION
 
 #####################################################################################
 
