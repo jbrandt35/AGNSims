@@ -12,7 +12,7 @@ perturber_separation_range = np.array(list(range(int(100 * perturber_separation_
 BBH_separation_range = np.array(list(range(int(100 * BBH_separation_range[0]), int(100 * (BBH_separation_range[1] + BBH_separation_range[2])), int(100 * BBH_separation_range[2])))) / 100
 
 
-def return_bash(script, path = "/storage/home/hhive1/jbrandt35/data/AGN_sims/Scripts/"):
+def return_bash(script, path = "/storage/home/hhive1/jbrandt35/data/AGN_sims/heatmap/utils"):
     working_dir = os.getcwd()
     os.chdir(path)
     output_stream = os.popen("./" + script)

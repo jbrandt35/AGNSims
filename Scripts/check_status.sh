@@ -1,1 +1,0 @@
-qstat -u jbrandt35
