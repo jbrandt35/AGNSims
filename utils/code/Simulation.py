@@ -9,7 +9,7 @@ binary_separation = BINSEPARATION
 
 sim = create_simulation()
 
-w = populate_simulation(sim, perturber_a = perturber_a, binary_separation = binary_separation)
+w = populate_simulation(sim, perturber_a = perturber_a, binary_separation = binary_separation, randomize_M = True)
 
 binary_period = get_binary_period(sim)
 SMBH_period = get_SMBH_period(sim)
