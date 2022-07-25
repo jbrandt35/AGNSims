@@ -171,7 +171,7 @@ def t_GW(sim, particle1, particle2):
     return t_gw
 
 
-def check_for_collisions(sim, w, outcome_record):
+def check_for_collisions(sim, w, record):
 
     ##############Check Binary Orbits###############
 
@@ -185,13 +185,13 @@ def check_for_collisions(sim, w, outcome_record):
     distance, period = orbit.d, orbit.P
 
     if distance < sum_of_event_horizons:
-        outcome_record["Result"] = f"Collision Encountered: The distance between m1_a and m1_b was {distance} AU when the sum of event horizon radii was {sum_of_event_horizons} AU."
-        dump_record(outcome_record)
-        raise Exception
+        record["Result"] = f"Collision Encountered: The distance between m1_a and m1_b was {distance} AU when the sum of event horizon radii was {sum_of_event_horizons} AU."
+        dump_record(record)
+        raise CollisionException(record["Result"])
     elif t_gw < period:
-        outcome_record["Result"] = f"Collision Encountered: t_GW was {t_gw} when the period was {period}."
-        dump_record(outcome_record)
-        raise Exception
+        record["Result"] = f"Collision Encountered: t_GW was {t_gw} when the period was {period}."
+        dump_record(record)
+        raise CollisionException(record["Result"])
 
     ##############Check Perturber Orbits###############
 
@@ -210,26 +210,26 @@ def check_for_collisions(sim, w, outcome_record):
     m1_b_distance = BH_b.calculate_orbit(primary = perturber).d
 
     if m1_a_distance < r_p:
-        outcome_record["Result"] = f"Collision Encountered: The distance between m1_a and m2 was {m1_a_distance} AU when r_p was {r_p} AU."
-        dump_record(outcome_record)
-        raise Exception
+        record["Result"] = f"Collision Encountered: The distance between m1_a and m2 was {m1_a_distance} AU when r_p was {r_p} AU."
+        dump_record(record)
+        raise CollisionException(record["Result"])
 
     if m1_b_distance < r_p:
-        outcome_record["Result"] = f"Collision Encountered: The distance between m1_b and m2 was {m1_b_distance} AU when r_p was {r_p} AU."
-        dump_record(outcome_record)
-        raise Exception
+        record["Result"] = f"Collision Encountered: The distance between m1_b and m2 was {m1_b_distance} AU when r_p was {r_p} AU."
+        dump_record(record)
+        raise CollisionException(record["Result"])
 
 
-def dump_record(outcome_record):
+def dump_record(record):
     with open("outcome.json", "w") as file:
-        json.dump(outcome_record, file)
+        json.dump(record, file)
 
 
-def check_binary_bound(sim, outcome_record):
+def check_binary_bound(sim, record):
     if not is_bound(sim.particles["BBH_1"], sim.particles["BBH_2"]):
-        outcome_record["Result"] = "Unbound"
-        dump_record(outcome_record)
-        raise Exception
+        record["Result"] = f"Unbound: Binary eccentricity reached {sim.particles['BBH_2'].calculate_orbit(primary = sim.particles['BBH_1']).e}"
+        dump_record(record)
+        raise UnboundException(record["Result"])
 
 
 def dist_between(particle_1, particle_2):
@@ -347,6 +347,13 @@ def construct_plots():
     plt.ylabel("Distance [AU]")
     plt.savefig("plots/DistPerturbm1b.jpg", bbox_inches = "tight")
     plt.close()
+
+class UnboundException(Exception):
+    pass
+
+class CollisionException(Exception):
+    pass
+
 
 #####################################################################################
 
