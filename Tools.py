@@ -12,6 +12,7 @@ c = constants.c.to("AU/yr").value
 def create_simulation():
     sim = rebound.Simulation()
     sim.units = ["Msun", "yr", "AU"]
+
     return sim
 
 
@@ -71,7 +72,7 @@ def get_BBH_data(m1, m2, a, e = 0, M = 0, inc = 0):
 #SMBH_a in units of Gravitational Radii, binary_separation in units of m1 Hill radii, perturber_a in units of m1+m2 Hill radii
 #Returns w - for calculating mergers between m1 and m2
 #Each particle is hashed with a name useful for other functions - i.e. see period calculation functions
-def populate_simulation(sim, m_SMBH = m0, m_BH_1 = m1_a, m_BH_2 = m1_b, m_perturber = m2, binary_separation = 0.1, binary_eccentricity = 0, binary_M = 0, binary_inc = 0, SMBH_a = 1000, SMBH_eccentricity = 0, SMBH_M = 0, SMBH_inc = 0, perturber_a = 20, perturber_e = 0, perturber_M = 0, perturber_inc = 0, randomize_M = False):
+def populate_simulation(sim, binary_separation = 0.1, binary_eccentricity = 0, binary_M = 0, binary_inc = 0, SMBH_a = 1000, SMBH_eccentricity = 0, SMBH_M = 0, SMBH_inc = 0, perturber_a = 20, perturber_e = 0, perturber_M = 0, perturber_inc = 0, randomize_M = False):
 
     #Calculate Gravitational Radius and convert units of SMBH_a
     Rg = sim.G * m0 / c ** 2
@@ -82,32 +83,34 @@ def populate_simulation(sim, m_SMBH = m0, m_BH_1 = m1_a, m_BH_2 = m1_b, m_pertur
     perturber_factor = (1 + (perturber_a/2) * mass_factor) / (1 - (perturber_a/2) * mass_factor)
     perturber_a = SMBH_a * perturber_factor
 
+    #print(2 * np.power(3 * m_SMBH / (m_BH_1 + m_BH_2 + m_perturber), 1 / 3) * (perturber_a - SMBH_a) / (perturber_a + SMBH_a))
+
     #If randomized mean anamolies are wanted, generate three numbers 0-2pi and set mean anamolies
     if randomize_M:
         SMBH_M, binary_M, perturber_M = 2 * np.pi * np.random.rand(3)
 
     #Add the SMBH to the sim
-    sim.add(m = m_SMBH, hash = "SMBH")
+    sim.add(m = m0, hash = "SMBH")
 
     #Get position, velocity, and Hill radius of binary's COM
-    binary_COM_position, binary_COM_velocity, m1_R_hill = get_binary_COM_data(m_SMBH, m_BH_1 + m_BH_2, SMBH_a, e = SMBH_eccentricity, M = SMBH_M, inc = SMBH_inc)
+    binary_COM_position, binary_COM_velocity, m1_R_hill = get_binary_COM_data(m0, m1_a + m1_b, SMBH_a, e = SMBH_eccentricity, M = SMBH_M, inc = SMBH_inc)
 
     #Change units of binary_separation
     binary_separation *= m1_R_hill
 
     #Get data of BHs in binary (in binary COM F.O.R.)
-    BH_1_data, BH_2_data = get_BBH_data(m_BH_1, m_BH_2, binary_separation, e = binary_eccentricity, M = binary_M, inc = binary_inc)
+    BH_1_data, BH_2_data = get_BBH_data(m1_a, m1_b, binary_separation, e = binary_eccentricity, M = binary_M, inc = binary_inc)
 
     #Unpack BBH data
     BH_1_position, BH_1_velocity = BH_1_data
     BH_2_position, BH_2_velocity = BH_2_data
 
     #Create particles for BBHs
-    BH_1 = rebound.Particle(m = m_BH_1, hash = "BBH_1")
+    BH_1 = rebound.Particle(m = m1_a, hash = "BBH_1")
     BH_1.xyz = BH_1_position + binary_COM_position
     BH_1.vxyz = BH_1_velocity + binary_COM_velocity
 
-    BH_2 = rebound.Particle(m = m_BH_2, hash = "BBH_2")
+    BH_2 = rebound.Particle(m = m1_b, hash = "BBH_2")
     BH_2.xyz = BH_2_position + binary_COM_position
     BH_2.vxyz = BH_2_velocity + binary_COM_velocity
 
@@ -116,13 +119,13 @@ def populate_simulation(sim, m_SMBH = m0, m_BH_1 = m1_a, m_BH_2 = m1_b, m_pertur
     sim.add(BH_2)
 
     #Add perturber into sim
-    sim.add(primary = sim.particles["SMBH"], m = m_perturber, a = perturber_a, e = perturber_e, M = perturber_M, inc = perturber_inc, hash = "perturber")
+    sim.add(primary = sim.particles["SMBH"], m = m2, a = perturber_a, e = perturber_e, M = perturber_M, inc = perturber_inc, hash = "perturber")
 
     #Move to COM frame of simulation
     sim.move_to_com()
 
-    return np.sqrt(sim.G * m_SMBH/ SMBH_a) - np.sqrt(sim.G * m_SMBH / perturber_a) + np.sqrt(
-        sim.G * (m_BH_1 + m_BH_2) / (binary_separation ** 3)) * binary_separation * (m_BH_2/(m_BH_1+m_BH_2))
+    return np.sqrt(sim.G * m0 / SMBH_a) - np.sqrt(sim.G * m0 / perturber_a) + np.sqrt(
+        sim.G * (m1_a + m1_b) / (binary_separation ** 3)) * binary_separation * (m1_b/(m1_a+m1_b))
 
 
 def barycenter(p1, p2):

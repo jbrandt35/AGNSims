@@ -7,12 +7,23 @@ binary_separation = 0.3
 
 #####################################################################################
 
+def migration_force(reb_sim):
+    sim.particles["perturber"].ax -= sim.particles["perturber"].vx/tau
+    sim.particles["perturber"].ay -= sim.particles["perturber"].vy/tau
+    sim.particles["perturber"].az -= sim.particles["perturber"].vz/tau
+
+#####################################################################################
+
 sim = create_simulation()
 
 w = populate_simulation(sim, perturber_a = perturber_a, binary_separation = binary_separation)
 
 binary_period, SMBH_period = get_binary_period(sim), get_SMBH_period(sim)
 sim.dt = 0.05 * binary_period
+
+tau = 1000.
+sim.additional_forces = migration_force
+sim.force_is_velocity_dependent = 1
 
 #####################################################################################
 
@@ -31,7 +42,6 @@ m1_a_helio_xs, m1_a_helio_ys = [], []
 m1_b_helio_xs, m1_b_helio_ys = [], []
 
 perturber_m1a_distance, perturber_m1b_distance = [], []
-
 
 #####################################################################################
 
@@ -151,8 +161,9 @@ while sim.t <= 10**5 * SMBH_period:
     check_binary_bound(sim, outcome_record)
     #---------------Check for Collisions------------------------------------------#
     check_for_collisions(sim, w, outcome_record)
+    # ----------------------------------------------------------------------------#
 
-    sim.steps(1)
+    sim.step()
     total_time_steps_completed += 1
 
 outcome_record["Result"] = "Ended with no mergers and bound binary"
