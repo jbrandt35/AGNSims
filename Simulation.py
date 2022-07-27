@@ -1,7 +1,7 @@
 from Tools import *
 
 perturber_a = 4
-binary_separation = 0.5
+binary_separation = 0.3
 
 #####################################################################################
 
@@ -16,19 +16,21 @@ def migration_force(reb_sim):
 sim = create_simulation()
 w = populate_simulation(sim, perturber_a = perturber_a, binary_separation = binary_separation)
 
-binary_period, SMBH_period = get_binary_period(sim), get_SMBH_period(sim)
+binary_period, SMBH_period, perturber_period = get_binary_period(sim), get_SMBH_period(sim), get_perturber_period(sim)
 sim.dt = 0.05 * binary_period
 
-tau = 1000.
+tau = 10**5 * perturber_period
 sim.additional_forces = migration_force
 sim.force_is_velocity_dependent = 1
+
+#####################################################################################
 
 while sim.t <= 10**5 * SMBH_period:
 
     check_and_assign_minimums(sim, outcome_record)
 
     global total_time_steps_completed
-    if total_time_steps_completed % 10000 == 0:
+    if total_time_steps_completed % 10 == 0:
         save_plotting_data(sim)
         construct_plots()
 

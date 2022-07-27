@@ -13,7 +13,6 @@ c = constants.c.to("AU/yr").value
 def create_simulation():
     sim = rebound.Simulation()
     sim.units = ["Msun", "yr", "AU"]
-
     return sim
 
 
@@ -84,8 +83,6 @@ def populate_simulation(sim, binary_separation = 0.1, binary_eccentricity = 0, b
     perturber_factor = (1 + (perturber_a/2) * mass_factor) / (1 - (perturber_a/2) * mass_factor)
     perturber_a = SMBH_a * perturber_factor
 
-    #print(2 * np.power(3 * m_SMBH / (m_BH_1 + m_BH_2 + m_perturber), 1 / 3) * (perturber_a - SMBH_a) / (perturber_a + SMBH_a))
-
     #If randomized mean anamolies are wanted, generate three numbers 0-2pi and set mean anamolies
     if randomize_M:
         SMBH_M, binary_M, perturber_M = 2 * np.pi * np.random.rand(3)
@@ -129,22 +126,21 @@ def populate_simulation(sim, binary_separation = 0.1, binary_eccentricity = 0, b
         sim.G * (m1_a + m1_b) / (binary_separation ** 3)) * binary_separation * (m1_b/(m1_a+m1_b))
 
 
-def barycenter(p1, p2):
-    r1, r2 = np.array(p1.xyz), np.array(p2.xyz)
-    barycenter = (r1 * p1.m + r2 * p2.m) / (p1.m + p2.m)
-    return barycenter
-
-
 def get_binary_period(sim):
     orbit = sim.particles["BBH_1"].calculate_orbit(primary = sim.particles["BBH_2"])
     return orbit.P
 
 
-def get_SMBH_period(sim, SMBH_a = 1000, SMBH_mass = m0, binary_mass = (m1_a + m1_b)):
-    Rg = sim.G * SMBH_mass / c ** 2
+def get_SMBH_period(sim, SMBH_a = 1000):
+    Rg = sim.G * m0 / c ** 2
     SMBH_a *= Rg
-    T_squared = (SMBH_a**3) * (4 * (np.pi**2)) / (sim.G * (SMBH_mass + binary_mass))
+    T_squared = (SMBH_a**3) * (4 * (np.pi**2)) / (sim.G * (m0 + m1_a + m1_b))
     return np.sqrt(T_squared)
+
+
+def get_perturber_period(sim):
+    orbit = sim.particles["perturber"].calculate_orbit(primary = sim.particles["SMBH"])
+    return orbit.P
 
 
 def is_bound(primary, secondary):
@@ -236,6 +232,24 @@ def dist_between(particle_1, particle_2):
     particle_1_position, particle_2_position = np.array(particle_1.xyz), np.array(particle_2.xyz)
     return mag(particle_1_position - particle_2_position)
 
+def get_perturber_binary_separation(binary_COM, perturber):
+
+    virtual_sim = create_simulation()
+    virtual_sim.add(m = m0)
+    virtual_sim.add(binary_COM)
+
+    a_binary_COM = virtual_sim.particles[1].calculate_orbit(primary = virtual_sim.particles[0]).a
+    a_perturber = perturber.calculate_orbit().a
+
+    del virtual_sim
+
+    mass_factor = np.power(3*m0 / (m1_a + m1_b + m2), 1/3)
+    a_factor = (a_perturber - a_binary_COM) / (a_perturber + a_binary_COM)
+
+    n = 2 * mass_factor * a_factor
+
+    return n
+
 
 def check_and_assign_minimums(sim, record):
     # Get binary COM as a rebound.Particle
@@ -281,6 +295,8 @@ def save_plotting_data(sim):
     m1_b_helio_ys.append(sim.particles["BBH_2"].y)
     perturber_m1a_distance.append(sim.particles["perturber"].calculate_orbit(primary = sim.particles["BBH_1"]).d)
     perturber_m1b_distance.append(sim.particles["perturber"].calculate_orbit(primary = sim.particles["BBH_2"]).d)
+    perturber_binary_separation.append(get_perturber_binary_separation(binary_barycenter, sim.particles["perturber"]))
+    perturber_a.append(sim.particles["perturber"].calculate_orbit(primary = sim.particles["SMBH"]).a)
 
 
 def construct_plots():
@@ -348,6 +364,24 @@ def construct_plots():
     plt.savefig("plots/DistPerturbm1b.jpg", bbox_inches = "tight")
     plt.close()
 
+    plt.plot(times, perturber_binary_separation)
+    plt.title("Separation Between Orbits of Perturber and Binary \n $\\tau = 10^5 T_{m_2}$")
+    plt.xlabel("Time [yr]")
+    plt.ylabel("Separation [AU]")
+    plt.xscale("log")
+    plt.axhline(y = 4, color = "black", linestyle = "--", alpha = 0.5)
+    plt.axhline(y = 2.5, color = "black", linestyle = "--", alpha = 0.5)
+    plt.savefig("plots/DistPerturbBinary.jpg", bbox_inches = "tight")
+    plt.close()
+
+    plt.plot(times, perturber_a)
+    plt.title("Semi-major Axis of Perturber")
+    plt.xlabel("Time [yr]")
+    plt.ylabel("a [AU]")
+    plt.savefig("plots/PerturberSemiMajor.jpg", bbox_inches = "tight")
+    plt.close()
+
+
 class UnboundException(Exception):
     pass
 
@@ -363,6 +397,9 @@ outcome_record = {"Result": None, "Minimum Distance Between Binary COM and Pertu
 total_time_steps_completed = 0
 
 time_steps, binary_distances, SMBH_distances, times, eccentricities = [], [], [], [], []
+
+perturber_binary_separation = []
+perturber_a = []
 
 m1_a_xs, m1_a_ys, m1_b_xs, m1_b_ys = [], [], [], []
 
