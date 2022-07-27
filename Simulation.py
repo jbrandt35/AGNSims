@@ -16,7 +16,7 @@ def migration_force(reb_sim):
 sim = create_simulation()
 w = populate_simulation(sim, perturber_a = perturber_a, binary_separation = binary_separation)
 
-binary_period, SMBH_period, perturber_period = get_binary_period(sim), get_SMBH_period(sim), get_perturber_period(sim)
+binary_period, SMBH_period, perturber_period = get_binary_period(sim), get_binary_SMBH_period(sim), get_perturber_period(sim)
 sim.dt = 0.05 * binary_period
 
 tau = 10**5 * perturber_period

@@ -131,11 +131,13 @@ def get_binary_period(sim):
     return orbit.P
 
 
-def get_SMBH_period(sim, SMBH_a = 1000):
-    Rg = sim.G * m0 / c ** 2
-    SMBH_a *= Rg
-    T_squared = (SMBH_a**3) * (4 * (np.pi**2)) / (sim.G * (m0 + m1_a + m1_b))
-    return np.sqrt(T_squared)
+def get_binary_SMBH_period(sim):
+    binary_barycenter = sim.calculate_com(first = 1, last = 3)
+    virtual_sim = create_simulation()
+    virtual_sim.add(m = m0)
+    virtual_sim.add(binary_barycenter)
+    orbit = virtual_sim.particles[1].calculate_orbit(primary = virtual_sim.particles[0])
+    return orbit.P
 
 
 def get_perturber_period(sim):
