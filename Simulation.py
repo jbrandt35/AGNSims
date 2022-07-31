@@ -32,7 +32,6 @@ while sim.t <= 10**5 * SMBH_period:
 
     global total_time_steps_completed
     if total_time_steps_completed % 10 == 0:
-        save_plotting_data(sim)
         construct_plots()
         save_data(sim)
 

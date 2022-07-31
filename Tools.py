@@ -278,9 +278,15 @@ def initialize_data_collection():
         with open(f"data/{BH}_data.csv", "w") as file:
             file.write(",".join(["time", "x", "y", "z"]) + "\n")
 
+    with open("data/binary_data.csv", "w") as file:
+        file.write(",".join(["time", "x", "y", "z", "Eccentricity"]) + "\n")
 
-def establish_dataframes():
-    BH_df, mixed_df = pd.DataFrame(columns = ["time", "x", "y", "z"]), pd.DataFrame()
+    with open("data/other_data.csv", "w") as file:
+        file.write(",".join(["time", "Perturber-Binary Separation", "a_perturber", "Time-Step"]) + "\n")
+
+
+def establish_BH_dataframes():
+    BH_df = pd.DataFrame(columns = ["time", "x", "y", "z"])
 
     SMBH_df = BH_df.copy(deep = True)
     BBH_1_df = BH_df.copy(deep = True)
@@ -294,39 +300,21 @@ def save_in_frame(frame, data):
 
 
 def save_data(sim):
-    for hash, frame in establish_dataframes():
+    for hash, frame in establish_BH_dataframes():
         data = [sim.t] + sim.particles[hash].xyz
         save_in_frame(frame, data)
         frame.to_csv(f"data/{hash}_data.csv", mode = "a", header = False)
 
+    binary_df = pd.DataFrame(columns = ["time", "x", "y", "z", "Eccentricity"])
+    binary_COM = sim.calculate_com(first = 1, last = 3)
+    data = [sim.t] + binary_COM.xyz + [sim.particles["BBH_2"].calculate_orbit(primary = sim.particles["BBH_1"]).e]
+    save_in_frame(binary_df, data)
+    binary_df.to_csv("data/binary_data.csv", mode = "a", header = False)
 
-def save_plotting_data(sim):
-    binary_barycenter = sim.calculate_com(first = 1, last = 3)
-
-    SMBH_distance = dist_between(sim.particles["SMBH"], binary_barycenter)
-    distance_between_BBHs = sim.particles["BBH_2"].calculate_orbit(primary = sim.particles["BBH_1"]).d
-
-    times.append(sim.t)
-    time_steps.append(sim.dt)
-    binary_distances.append(distance_between_BBHs)
-    m1_a_xs.append(sim.particles["BBH_1"].x - binary_barycenter.x)
-    m1_a_ys.append(sim.particles["BBH_1"].y - binary_barycenter.y)
-    m1_b_xs.append(sim.particles["BBH_2"].x - binary_barycenter.x)
-    m1_b_ys.append(sim.particles["BBH_2"].y - binary_barycenter.y)
-    SMBH_distances.append(SMBH_distance)
-    eccentricities.append(sim.particles["BBH_2"].calculate_orbit(primary = sim.particles["BBH_1"]).e)
-    SMBH_xs.append(sim.particles["SMBH"].x)
-    SMBH_ys.append(sim.particles["SMBH"].y)
-    perturber_xs.append(sim.particles["perturber"].x)
-    perturber_ys.append(sim.particles["perturber"].y)
-    m1_a_helio_xs.append(sim.particles["BBH_1"].x)
-    m1_a_helio_ys.append(sim.particles["BBH_1"].y)
-    m1_b_helio_xs.append(sim.particles["BBH_2"].x)
-    m1_b_helio_ys.append(sim.particles["BBH_2"].y)
-    perturber_m1a_distance.append(sim.particles["perturber"].calculate_orbit(primary = sim.particles["BBH_1"]).d)
-    perturber_m1b_distance.append(sim.particles["perturber"].calculate_orbit(primary = sim.particles["BBH_2"]).d)
-    perturber_binary_separation.append(get_perturber_binary_separation(binary_barycenter, sim.particles["perturber"]))
-    perturber_a.append(sim.particles["perturber"].calculate_orbit(primary = sim.particles["SMBH"]).a)
+    other_df = pd.DataFrame(columns = ["time", "Perturber-Binary Separation", "a_perturber", "Time-Step"])
+    data = [sim.t] + [get_perturber_binary_separation(binary_COM, sim.particles["perturber"])] + [sim.particles["perturber"].calculate_orbit(primary = sim.particles["SMBH"]).a] + [sim.dt]
+    save_in_frame(other_df, data)
+    other_df.to_csv("data/other_data.csv", mode = "a", header = False)
 
 
 def construct_plots():
