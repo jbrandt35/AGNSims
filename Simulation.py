@@ -23,6 +23,7 @@ tau = 10**5 * perturber_period
 sim.additional_forces = migration_force
 sim.force_is_velocity_dependent = 1
 
+initialize_data_collection()
 #####################################################################################
 
 while sim.t <= 10**5 * SMBH_period:
@@ -33,6 +34,7 @@ while sim.t <= 10**5 * SMBH_period:
     if total_time_steps_completed % 10 == 0:
         save_plotting_data(sim)
         construct_plots()
+        save_data(sim)
 
     check_binary_bound(sim, outcome_record)
     check_for_collisions(sim, w, outcome_record)

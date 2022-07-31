@@ -4,6 +4,7 @@ import numpy as np
 from numpy.linalg import norm as mag
 import matplotlib.pyplot as plt
 from astropy import constants
+import pandas as pd
 
 m0, m1_a, m1_b, m2 = 10 ** 6, 10, 10, 20
 c = constants.c.to("AU/yr").value
@@ -271,6 +272,33 @@ def check_and_assign_minimums(sim, record):
         record["Minimum t_GW"] = t_gw
     if relative_tGW < record["Minimum relative t_GW"]:
         record["Minimum relative t_GW"] = relative_tGW
+
+def initialize_data_collection():
+    for BH in ["SMBH", "BBH_1", "BBH_2", "perturber"]:
+        with open(f"data/{BH}_data.csv", "w") as file:
+            file.write(",".join(["time", "x", "y", "z"]) + "\n")
+
+
+def establish_dataframes():
+    BH_df, mixed_df = pd.DataFrame(columns = ["time", "x", "y", "z"]), pd.DataFrame()
+
+    SMBH_df = BH_df.copy(deep = True)
+    BBH_1_df = BH_df.copy(deep = True)
+    BBH_2_df = BH_df.copy(deep = True)
+    perturber_df = BH_df.copy(deep = True)
+
+    return [("SMBH", SMBH_df), ("BBH_1", BBH_1_df), ("BBH_2", BBH_2_df), ("perturber", perturber_df)]
+
+def save_in_frame(frame, data):
+    frame.loc[len(frame.index)] = data
+
+
+def save_data(sim):
+    for hash, frame in establish_dataframes():
+        data = [sim.t] + sim.particles[hash].xyz
+        save_in_frame(frame, data)
+        frame.to_csv(f"data/{hash}_data.csv", mode = "a", header = False)
+
 
 def save_plotting_data(sim):
     binary_barycenter = sim.calculate_com(first = 1, last = 3)
