@@ -328,21 +328,5 @@ class CollisionException(Exception):
 outcome_record = {"Result": None, "Minimum Distance Between Binary COM and Perturber": np.inf,
                   "Minimum Distance Between BBHs": np.inf, "Minimum t_GW": np.inf, "Minimum relative t_GW": np.inf}
 
-total_time_steps_completed = 0
-
-time_steps, binary_distances, SMBH_distances, times, eccentricities = [], [], [], [], []
-
-perturber_binary_separation = []
-perturber_a = []
-
-m1_a_xs, m1_a_ys, m1_b_xs, m1_b_ys = [], [], [], []
-
-perturber_xs, perturber_ys = [], []
-SMBH_xs, SMBH_ys = [], []
-m1_a_helio_xs, m1_a_helio_ys = [], []
-m1_b_helio_xs, m1_b_helio_ys = [], []
-
-perturber_m1a_distance, perturber_m1b_distance = [], []
-
 #####################################################################################
 
