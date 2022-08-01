@@ -2,7 +2,6 @@ import json
 import rebound
 import numpy as np
 from numpy.linalg import norm as mag
-import matplotlib.pyplot as plt
 from astropy import constants
 import pandas as pd
 
@@ -276,17 +275,17 @@ def check_and_assign_minimums(sim, record):
 def initialize_data_collection():
     for BH in ["SMBH", "BBH_1", "BBH_2", "perturber"]:
         with open(f"data/{BH}_data.csv", "w") as file:
-            file.write(",".join(["time", "x", "y", "z"]) + "\n")
+            file.write(",".join(["time", "x", "y", "z", "vx", "vy", "vz"]) + "\n")
 
     with open("data/binary_data.csv", "w") as file:
-        file.write(",".join(["time", "x", "y", "z", "Eccentricity"]) + "\n")
+        file.write(",".join(["time", "x", "y", "z", "vx", "vy", "vz", "Eccentricity"]) + "\n")
 
     with open("data/other_data.csv", "w") as file:
         file.write(",".join(["time", "Perturber-Binary Separation", "a_perturber", "Time-Step"]) + "\n")
 
 
 def establish_BH_dataframes():
-    BH_df = pd.DataFrame(columns = ["time", "x", "y", "z"])
+    BH_df = pd.DataFrame(columns = ["time", "x", "y", "z", "vx", "vy", "vz"])
 
     SMBH_df = BH_df.copy(deep = True)
     BBH_1_df = BH_df.copy(deep = True)
@@ -301,13 +300,13 @@ def save_in_frame(frame, data):
 
 def save_data(sim):
     for hash, frame in establish_BH_dataframes():
-        data = [sim.t] + sim.particles[hash].xyz
+        data = [sim.t] + sim.particles[hash].xyz + sim.particles[hash].vxyz
         save_in_frame(frame, data)
-        frame.to_csv(f"data/{hash}_data.csv", mode = "a", header = False)
+        frame.to_csv(f"data/{hash}_data.csv", mode = "a", header = False, index = False)
 
-    binary_df = pd.DataFrame(columns = ["time", "x", "y", "z", "Eccentricity"])
+    binary_df = pd.DataFrame(columns = ["time", "x", "y", "z", "vx", "vy", "vz", "Eccentricity"])
     binary_COM = sim.calculate_com(first = 1, last = 3)
-    data = [sim.t] + binary_COM.xyz + [sim.particles["BBH_2"].calculate_orbit(primary = sim.particles["BBH_1"]).e]
+    data = [sim.t] + binary_COM.xyz + binary_COM.vxyz + [sim.particles["BBH_2"].calculate_orbit(primary = sim.particles["BBH_1"]).e]
     save_in_frame(binary_df, data)
     binary_df.to_csv("data/binary_data.csv", mode = "a", header = False)
 
@@ -315,89 +314,6 @@ def save_data(sim):
     data = [sim.t] + [get_perturber_binary_separation(binary_COM, sim.particles["perturber"])] + [sim.particles["perturber"].calculate_orbit(primary = sim.particles["SMBH"]).a] + [sim.dt]
     save_in_frame(other_df, data)
     other_df.to_csv("data/other_data.csv", mode = "a", header = False)
-
-
-def construct_plots():
-
-    plt.plot(times, time_steps)
-    plt.xlabel("Time [yr]")
-    plt.ylabel("dt [yr]")
-    plt.title("Time-step over Time")
-    plt.yscale("log", base = 10)
-    plt.savefig("plots/timeVsdt.jpg", bbox_inches = "tight")
-    plt.close()
-
-    plt.plot(times, binary_distances)
-    plt.xlabel("Time [yr]")
-    plt.ylabel("Distance [AU]")
-    plt.title("Distance Between BHs in Binary over Time")
-    plt.savefig("plots/timeVSDistance.jpg", bbox_inches = "tight")
-    plt.close()
-
-    plt.plot(times, eccentricities)
-    plt.xlabel("Time [yr]")
-    plt.ylabel("Eccentricity")
-    plt.title("Eccentricity of the Binary in the Barycentric Frame over Time")
-    plt.savefig("plots/timeVSEccentricity.jpg", bbox_inches = "tight")
-    plt.close()
-
-    plt.scatter(m1_a_xs, m1_a_ys, label = "m1_a")
-    plt.scatter(m1_b_xs, m1_b_ys, label = "m1_b")
-    plt.title("Trajectory of Binary BBHs in Barycentric Frame")
-    plt.xlabel("x [AU]")
-    plt.ylabel("y [AU]")
-    plt.legend()
-    plt.savefig("plots/BinaryTrajectory.jpg", bbox_inches = "tight")
-    plt.close()
-
-    plt.plot(times, SMBH_distances)
-    plt.xlabel("Time [yr]")
-    plt.ylabel("Distance [AU]")
-    plt.title("Distance from SMBH to m1 over Time")
-    plt.savefig("plots/BinaryDisttoSMBH.jpg", bbox_inches = "tight")
-    plt.close()
-
-    plt.scatter(np.array(m1_a_helio_xs), np.array(m1_a_helio_ys), label = "m1_a")
-    plt.scatter(np.array(m1_b_helio_xs), np.array(m1_b_helio_ys), label = "m1_b")
-    plt.scatter(np.array(perturber_xs), np.array(perturber_ys), label = "perturber")
-    plt.scatter(0, 0, label = "SMBH")
-    plt.title("System Trajectory")
-    plt.xlabel("x [AU]")
-    plt.ylabel("y [AU]")
-    plt.legend()
-    plt.savefig("plots/SystemTrajectory.jpg", bbox_inches = "tight")
-    plt.close()
-
-    plt.plot(times, perturber_m1a_distance)
-    plt.title("Distance Between m1_a and m2 over Time")
-    plt.xlabel("Time [yr]")
-    plt.ylabel("Distance [AU]")
-    plt.savefig("plots/DistPerturbm1a.jpg", bbox_inches = "tight")
-    plt.close()
-
-    plt.plot(times, perturber_m1b_distance)
-    plt.title("Distance Between m1_b and m2 over Time")
-    plt.xlabel("Time [yr]")
-    plt.ylabel("Distance [AU]")
-    plt.savefig("plots/DistPerturbm1b.jpg", bbox_inches = "tight")
-    plt.close()
-
-    plt.plot(times, perturber_binary_separation)
-    plt.title("Separation Between Orbits of Perturber and Binary \n $\\tau = 10^5 T_{m_2}$")
-    plt.xlabel("Time [yr]")
-    plt.ylabel("Separation [AU]")
-    plt.xscale("log")
-    plt.axhline(y = 4, color = "black", linestyle = "--", alpha = 0.5)
-    plt.axhline(y = 2.5, color = "black", linestyle = "--", alpha = 0.5)
-    plt.savefig("plots/DistPerturbBinary.jpg", bbox_inches = "tight")
-    plt.close()
-
-    plt.plot(times, perturber_a)
-    plt.title("Semi-major Axis of Perturber")
-    plt.xlabel("Time [yr]")
-    plt.ylabel("a [AU]")
-    plt.savefig("plots/PerturberSemiMajor.jpg", bbox_inches = "tight")
-    plt.close()
 
 
 class UnboundException(Exception):
