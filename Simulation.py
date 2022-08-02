@@ -26,13 +26,12 @@ sim.force_is_velocity_dependent = 1
 initialize_data_collection()
 #####################################################################################
 
-while sim.t <= 10**5 * SMBH_period:
+while sim.t <= 10**3 * SMBH_period:
 
     check_and_assign_minimums(sim, outcome_record)
 
     global total_time_steps_completed
     if total_time_steps_completed % 10 == 0:
-        construct_plots()
         save_data(sim)
 
     check_binary_bound(sim, outcome_record)

@@ -1,6 +1,9 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import os
+from matplotlib.animation import FuncAnimation
+
 
 def read_data(object):
     data = pd.read_csv(f"data/{object}_data.csv")
@@ -107,6 +110,75 @@ def construct_plots():
     plt.savefig("plots/PerturberSemiMajor.jpg", bbox_inches = "tight")
     plt.close()
 
-construct_plots()
+BBH_1_data = read_data("BBH_1")
+BBH_2_data = read_data("BBH_2")
+SMBH_data = read_data("SMBH")
+perturber_data = read_data("perturber")
+binary_data = read_data("binary")
+other_data = read_data("other")
+
+SMBH_x, SMBH_y = extract_coordinate(get_xyz(SMBH_data), "x"), extract_coordinate(get_xyz(SMBH_data), "y")
+BBH_1_x, BBH_1_y = extract_coordinate(get_xyz(BBH_1_data), "x"), extract_coordinate(get_xyz(BBH_1_data), "y")
+BBH_2_x, BBH_2_y = extract_coordinate(get_xyz(BBH_2_data), "x"), extract_coordinate(get_xyz(BBH_2_data), "y")
+perturber_x, perturber_y = extract_coordinate(get_xyz(perturber_data), "x"), extract_coordinate(get_xyz(perturber_data), "y")
+BBH_1_barycentric_x, BBH_1_barycentric_y = extract_coordinate(get_relative_xyz(BBH_1_data, binary_data), "x"), extract_coordinate(get_relative_xyz(BBH_1_data, binary_data), "y")
+BBH_2_barycentric_x, BBH_2_barycentric_y = extract_coordinate(get_relative_xyz(BBH_2_data, binary_data), "x"), extract_coordinate(get_relative_xyz(BBH_2_data, binary_data), "y")
 
 
+def animate_system_trajectory(i, SMBH_scatter, perturber_scatter, BBH_1_scatter, BBH_2_scatter):
+    SMBH_scatter.set_offsets([SMBH_x[i], SMBH_y[i]])
+    perturber_scatter.set_offsets([perturber_x[i], perturber_y[i]])
+    BBH_1_scatter.set_offsets([BBH_1_x[i], BBH_1_y[i]])
+    BBH_2_scatter.set_offsets([BBH_2_x[i], BBH_2_y[i]])
+
+
+def animate_binary_trajectory(i, BBH_1_scatter, BBH_2_scatter):
+    BBH_1_scatter.set_offsets([BBH_1_barycentric_x[i], BBH_1_barycentric_y[i]])
+    BBH_2_scatter.set_offsets([BBH_2_barycentric_x[i], BBH_2_barycentric_y[i]])
+
+
+def generate_binary_trajectory_animation():
+
+    plt.close()
+    lim = 0.04
+    fig, ax = plt.subplots(figsize=(5, 5))
+    ax.set_aspect("equal")
+    ax.set(xlim=(-lim, lim), ylim=(-lim, lim))
+
+    BBH_1_scatter = ax.scatter(BBH_1_barycentric_x[0], BBH_1_barycentric_y[0], s= 10, facecolor = "blue", zorder = 3, label = "BBH_1")
+    BBH_2_scatter = ax.scatter(BBH_2_barycentric_x[0], BBH_2_barycentric_y[0], s = 10, facecolor = "green", zorder = 3, label = "BBH_2")
+
+    plt.xlabel("x [AU]")
+    plt.ylabel("y [AU]")
+    plt.title("Animated Binary Trajectory")
+    plt.legend(loc = "upper right")
+
+    animation = FuncAnimation(fig, animate_binary_trajectory, interval = 400, fargs = (BBH_1_scatter, BBH_2_scatter))
+
+    animation.save("plots/BinaryTrajectory.mp4")
+
+
+def generate_system_trajectory_animation():
+
+    plt.close()
+    lim = 15
+    fig, ax = plt.subplots(figsize=(5, 5))
+    ax.set_aspect("equal")
+    ax.set(xlim = (-lim, lim), ylim = (-lim, lim))
+
+    SMBH_scatter = ax.scatter(SMBH_x[0], SMBH_y[0], s = 35, marker = "*", facecolor = "yellow", zorder = 3, label = "SMBH")
+    perturber_scatter = ax.scatter(perturber_x[0], perturber_y[0], s = 10, facecolor = "red", zorder = 3, label = "Perturber")
+    BBH_1_scatter = ax.scatter(BBH_1_x[0], BBH_1_y[0], s = 10, facecolor = "blue", zorder = 3, label = "BBH_1")
+    BBH_2_scatter = ax.scatter(BBH_2_x[0], BBH_2_y[0], s = 10, facecolor = "green", zorder = 3, label = "BBH_2")
+
+    plt.xlabel("x [AU]")
+    plt.ylabel("y [AU]")
+    plt.title("Animated System Trajectory")
+    plt.legend(loc = "upper right")
+
+    animation = FuncAnimation(fig, animate_system_trajectory, interval = 80, fargs = (SMBH_scatter, perturber_scatter, BBH_1_scatter, BBH_2_scatter))
+
+    animation.save("plots/SystemTrajectory.mp4")
+
+generate_binary_trajectory_animation()
+generate_system_trajectory_animation()

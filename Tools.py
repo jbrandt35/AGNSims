@@ -328,5 +328,6 @@ class CollisionException(Exception):
 outcome_record = {"Result": None, "Minimum Distance Between Binary COM and Perturber": np.inf,
                   "Minimum Distance Between BBHs": np.inf, "Minimum t_GW": np.inf, "Minimum relative t_GW": np.inf}
 
+total_time_steps_completed = 0
 #####################################################################################
 
