@@ -31,6 +31,25 @@ def extract_coordinate(positions, coordinate):
     coordinates = [position[coordinate] for position in positions]
     return np.array(coordinates)
 
+def split_coordinates(data, mode = "x,y"):
+    if mode == "x,y":
+        return extract_coordinate(get_xyz(data), "x"), extract_coordinate(get_xyz(data), "y")
+
+
+BBH_1_data = read_data("BBH_1")
+BBH_2_data = read_data("BBH_2")
+SMBH_data = read_data("SMBH")
+perturber_data = read_data("perturber")
+binary_data = read_data("binary")
+other_data = read_data("other")
+
+SMBH_x, SMBH_y = split_coordinates(SMBH_data)
+BBH_1_x, BBH_1_y = split_coordinates(BBH_1_data)
+BBH_2_x, BBH_2_y = split_coordinates(BBH_2_data)
+perturber_x, perturber_y = split_coordinates(perturber_data)
+BBH_1_barycentric_x, BBH_1_barycentric_y = extract_coordinate(get_relative_xyz(BBH_1_data, binary_data), "x"), extract_coordinate(get_relative_xyz(BBH_1_data, binary_data), "y")
+BBH_2_barycentric_x, BBH_2_barycentric_y = extract_coordinate(get_relative_xyz(BBH_2_data, binary_data), "x"), extract_coordinate(get_relative_xyz(BBH_2_data, binary_data), "y")
+
 
 def distance(p1, p2):
     p1, p2 = get_xyz(p1), get_xyz(p2)
@@ -107,26 +126,6 @@ def construct_plots():
     plt.ylabel("a [AU]")
     plt.savefig("plots/PerturberSemiMajor.jpg", bbox_inches = "tight")
     plt.close()
-
-def split_coordinates(data, mode = "x,y"):
-    if mode == "x,y":
-        return extract_coordinate(get_xyz(data), "x"), extract_coordinate(get_xyz(data), "y")
-
-
-BBH_1_data = read_data("BBH_1")
-BBH_2_data = read_data("BBH_2")
-SMBH_data = read_data("SMBH")
-perturber_data = read_data("perturber")
-binary_data = read_data("binary")
-other_data = read_data("other")
-
-SMBH_x, SMBH_y = split_coordinates(SMBH_data)
-BBH_1_x, BBH_1_y = split_coordinates(BBH_1_data)
-BBH_2_x, BBH_2_y = split_coordinates(BBH_2_data)
-perturber_x, perturber_y = split_coordinates(perturber_data)
-BBH_1_barycentric_x, BBH_1_barycentric_y = extract_coordinate(get_relative_xyz(BBH_1_data, binary_data), "x"), extract_coordinate(get_relative_xyz(BBH_1_data, binary_data), "y")
-BBH_2_barycentric_x, BBH_2_barycentric_y = extract_coordinate(get_relative_xyz(BBH_2_data, binary_data), "x"), extract_coordinate(get_relative_xyz(BBH_2_data, binary_data), "y")
-
 
 def animate_system_trajectory(i, ax, SMBH_scatter, perturber_scatter, BBH_1_scatter, BBH_2_scatter, trail_args):
     SMBH_scatter.set_offsets([SMBH_x[i], SMBH_y[i]])
@@ -206,7 +205,6 @@ def generate_system_trajectory_animation():
     animation.save("plots/SystemTrajectory.mp4")
 
 
-
-
+construct_plots()
 generate_binary_trajectory_animation()
 generate_system_trajectory_animation()
