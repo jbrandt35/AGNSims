@@ -128,7 +128,7 @@ BBH_1_barycentric_x, BBH_1_barycentric_y = extract_coordinate(get_relative_xyz(B
 BBH_2_barycentric_x, BBH_2_barycentric_y = extract_coordinate(get_relative_xyz(BBH_2_data, binary_data), "x"), extract_coordinate(get_relative_xyz(BBH_2_data, binary_data), "y")
 
 
-def animate_system_trajectory(i, SMBH_scatter, perturber_scatter, BBH_1_scatter, BBH_2_scatter, trail_args):
+def animate_system_trajectory(i, ax, SMBH_scatter, perturber_scatter, BBH_1_scatter, BBH_2_scatter, trail_args):
     SMBH_scatter.set_offsets([SMBH_x[i], SMBH_y[i]])
     perturber_scatter.set_offsets([perturber_x[i], perturber_y[i]])
     BBH_1_scatter.set_offsets([BBH_1_x[i], BBH_1_y[i]])
@@ -140,9 +140,10 @@ def animate_system_trajectory(i, SMBH_scatter, perturber_scatter, BBH_1_scatter,
             points = i
         trail.set_offsets(np.array([np.array(i) for i in zip(perturber_x[i-points:i], perturber_y[i-points:i])]))
 
+    ax.set_title(f"Animated System Trajectory \n t = {np.round(BBH_1_data['time'][i], 3)} yr")
 
 
-def animate_binary_trajectory(i, BBH_1_scatter, BBH_2_scatter, trail_args):
+def animate_binary_trajectory(i, ax, BBH_1_scatter, BBH_2_scatter, trail_args):
     BBH_1_scatter.set_offsets([BBH_1_barycentric_x[i], BBH_1_barycentric_y[i]])
     BBH_2_scatter.set_offsets([BBH_2_barycentric_x[i], BBH_2_barycentric_y[i]])
 
@@ -154,7 +155,7 @@ def animate_binary_trajectory(i, BBH_1_scatter, BBH_2_scatter, trail_args):
         BBH_1_trail.set_offsets(np.array([np.array(i) for i in zip(BBH_1_barycentric_x[i-trail_points:i],  BBH_1_barycentric_y[i-trail_points:i])]))
         BBH_2_trail.set_offsets(np.array([np.array(i) for i in zip(BBH_2_barycentric_x[i - trail_points:i], BBH_2_barycentric_y[i - trail_points:i])]))
 
-
+    ax.set_title(f"Animated Binary Trajectory \n t = {np.round(BBH_1_data['time'][i], 3)} yr")
 
 def generate_binary_trajectory_animation():
 
@@ -175,7 +176,7 @@ def generate_binary_trajectory_animation():
     plt.title("Animated Binary Trajectory")
     plt.legend(loc = "upper right")
 
-    animation = FuncAnimation(fig, animate_binary_trajectory, interval = 100, fargs = (BBH_1_scatter, BBH_2_scatter, (BBH_1_trail, BBH_2_trail, trail_points)))
+    animation = FuncAnimation(fig, animate_binary_trajectory, interval = 100, fargs = (ax, BBH_1_scatter, BBH_2_scatter, (BBH_1_trail, BBH_2_trail, trail_points)))
 
     animation.save("plots/BinaryTrajectory.mp4")
 
@@ -200,7 +201,7 @@ def generate_system_trajectory_animation():
     plt.title("Animated System Trajectory")
     plt.legend(loc = "upper right")
 
-    animation = FuncAnimation(fig, animate_system_trajectory, interval = 30, fargs = (SMBH_scatter, perturber_scatter, BBH_1_scatter, BBH_2_scatter, (perturber_trail, trail_points)))
+    animation = FuncAnimation(fig, animate_system_trajectory, interval = 30, fargs = (ax, SMBH_scatter, perturber_scatter, BBH_1_scatter, BBH_2_scatter, (perturber_trail, trail_points)))
 
     animation.save("plots/SystemTrajectory.mp4")
 
