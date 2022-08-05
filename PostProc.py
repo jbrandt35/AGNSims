@@ -1,9 +1,12 @@
 import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 import pandas as pd
 import numpy as np
 from numpy.linalg import norm as mag
 import os
-from matplotlib.animation import FuncAnimation
+
+
+data_objects = ["BBH_1", "BBH_2", "SMBH", "perturber", "binary", "other"]
 
 
 def read_data(object):
@@ -31,37 +34,57 @@ def extract_coordinate(positions, coordinate):
     coordinates = [position[coordinate] for position in positions]
     return np.array(coordinates)
 
+
 def split_coordinates(data, mode = "x,y"):
     if mode == "x,y":
         return extract_coordinate(get_xyz(data), "x"), extract_coordinate(get_xyz(data), "y")
 
 
-BBH_1_data = read_data("BBH_1")
-BBH_2_data = read_data("BBH_2")
-SMBH_data = read_data("SMBH")
-perturber_data = read_data("perturber")
-binary_data = read_data("binary")
-other_data = read_data("other")
+def get_last_time(df):
+    return df["time"].iloc[-1]
 
-SMBH_x, SMBH_y = split_coordinates(SMBH_data)
-BBH_1_x, BBH_1_y = split_coordinates(BBH_1_data)
-BBH_2_x, BBH_2_y = split_coordinates(BBH_2_data)
-perturber_x, perturber_y = split_coordinates(perturber_data)
-BBH_1_barycentric_x, BBH_1_barycentric_y = extract_coordinate(get_relative_xyz(BBH_1_data, binary_data), "x"), extract_coordinate(get_relative_xyz(BBH_1_data, binary_data), "y")
-BBH_2_barycentric_x, BBH_2_barycentric_y = extract_coordinate(get_relative_xyz(BBH_2_data, binary_data), "x"), extract_coordinate(get_relative_xyz(BBH_2_data, binary_data), "y")
+
+def generate_data():
+    d = {}
+    for name in data_objects:
+        d[name] = read_data(name)
+    return d
+
+
+data_dict = generate_data()
+
+def get_approp_t_end():
+    end_times = []
+    for df in data_dict.values():
+        end_times.append(get_last_time(df))
+    return min(end_times)
+
+
+def time_extract_data(t_start = 0, t_end = get_approp_t_end()):
+    for name, df in data_dict.items():
+        data_dict[name] = df[(df["time"] >= t_start) & (df["time"] <= t_end)].reset_index(drop = True)
+
+time_extract_data()
+
+SMBH_x, SMBH_y = split_coordinates(data_dict["SMBH"])
+BBH_1_x, BBH_1_y = split_coordinates(data_dict["BBH_1"])
+BBH_2_x, BBH_2_y = split_coordinates(data_dict["BBH_2"])
+perturber_x, perturber_y = split_coordinates(data_dict["perturber"])
+BBH_1_barycentric_x, BBH_1_barycentric_y = extract_coordinate(get_relative_xyz(data_dict["BBH_1"], data_dict["binary"]), "x"), extract_coordinate(get_relative_xyz(data_dict["BBH_1"], data_dict["binary"]), "y")
+BBH_2_barycentric_x, BBH_2_barycentric_y = extract_coordinate(get_relative_xyz(data_dict["BBH_2"], data_dict["binary"]), "x"), extract_coordinate(get_relative_xyz(data_dict["BBH_2"], data_dict["binary"]), "y")
 
 
 def distance(p1, p2):
     p1, p2 = get_xyz(p1), get_xyz(p2)
     distances = []
-    for i, pos in enumerate(p1):
-        dist = mag(p1[i] - p2[i])
-        distances.append(dist)
+    for i, _ in enumerate(p1):
+        distances.append(mag(p1[i] - p2[i]))
     return np.array(distances)
+
 
 def construct_plots():
 
-    plt.plot(other_data["time"], other_data["Time-Step"])
+    plt.plot(data_dict["other"]["time"], data_dict["other"]["Time-Step"])
     plt.xlabel("Time [yr]")
     plt.ylabel("dt [yr]")
     plt.title("Time-step over Time")
@@ -69,22 +92,22 @@ def construct_plots():
     plt.savefig("plots/time_vs_dt.jpg", bbox_inches = "tight")
     plt.close()
 
-    plt.plot(BBH_1_data["time"], distance(BBH_1_data, BBH_2_data))
+    plt.plot(data_dict["BBH_1"]["time"], distance(data_dict["BBH_1"],data_dict["BBH_2"]))
     plt.xlabel("Time [yr]")
     plt.ylabel("Distance [AU]")
     plt.title("Distance Between BHs in Binary over Time")
     plt.savefig("plots/time_vs_binary_distance.jpg", bbox_inches = "tight")
     plt.close()
 
-    plt.plot(binary_data["time"], binary_data["Eccentricity"])
+    plt.plot(data_dict["binary"]["time"], data_dict["binary"]["Eccentricity"])
     plt.xlabel("Time [yr]")
     plt.ylabel("Eccentricity")
     plt.title("Eccentricity of the Binary in the Barycentric Frame over Time")
     plt.savefig("plots/time_vs_eccentricity.jpg", bbox_inches = "tight")
     plt.close()
 
-    plt.scatter(extract_coordinate(get_relative_xyz(BBH_1_data, binary_data), "x"), extract_coordinate(get_relative_xyz(BBH_1_data, binary_data), "y"), label = "m1_a")
-    plt.scatter(extract_coordinate(get_relative_xyz(BBH_2_data, binary_data), "x"), extract_coordinate(get_relative_xyz(BBH_2_data, binary_data), "y"), label = "m1_b")
+    plt.scatter(extract_coordinate(get_relative_xyz(data_dict["BBH_1"], data_dict["binary"]), "x"), extract_coordinate(get_relative_xyz(data_dict["BBH_1"], data_dict["binary"]), "y"), label = "m1_a")
+    plt.scatter(extract_coordinate(get_relative_xyz(data_dict["BBH_2"], data_dict["binary"]), "x"), extract_coordinate(get_relative_xyz(data_dict["BBH_2"], data_dict["binary"]), "y"), label = "m1_b")
     plt.title("Trajectory of Binary BBHs in Barycentric Frame")
     plt.xlabel("x [AU]")
     plt.ylabel("y [AU]")
@@ -92,17 +115,17 @@ def construct_plots():
     plt.savefig("plots/BinaryTrajectory.jpg", bbox_inches = "tight")
     plt.close()
 
-    plt.plot(SMBH_data["time"], distance(SMBH_data, binary_data))
+    plt.plot(data_dict["SMBH"]["time"], distance(data_dict["SMBH"], data_dict["binary"]))
     plt.xlabel("Time [yr]")
     plt.ylabel("Distance [AU]")
     plt.title("Distance from SMBH to $m_1$ over Time")
     plt.savefig("plots/BinaryDisttoSMBH.jpg", bbox_inches = "tight")
     plt.close()
 
-    plt.scatter(extract_coordinate(get_xyz(BBH_1_data), "x"), extract_coordinate(get_xyz(BBH_1_data), "y"), label = "m1_a")
-    plt.scatter(extract_coordinate(get_xyz(BBH_2_data), "x"), extract_coordinate(get_xyz(BBH_2_data), "y"), label = "m1_b")
-    plt.scatter(extract_coordinate(get_xyz(perturber_data), "x"), extract_coordinate(get_xyz(perturber_data), "y"), label = "perturber")
-    plt.scatter(extract_coordinate(get_xyz(SMBH_data), "x"), extract_coordinate(get_xyz(SMBH_data), "y"), label = "SMBH")
+    plt.scatter(extract_coordinate(get_xyz(data_dict["BBH_1"]), "x"), extract_coordinate(get_xyz(data_dict["BBH_1"]), "y"), label = "m1_a")
+    plt.scatter(extract_coordinate(get_xyz(data_dict["BBH_2"]), "x"), extract_coordinate(get_xyz(data_dict["BBH_2"]), "y"), label = "m1_b")
+    plt.scatter(extract_coordinate(get_xyz(data_dict["perturber"]), "x"), extract_coordinate(get_xyz(data_dict["perturber"]), "y"), label = "perturber")
+    plt.scatter(extract_coordinate(get_xyz(data_dict["SMBH"]), "x"), extract_coordinate(get_xyz(data_dict["SMBH"]), "y"), label = "SMBH")
     plt.title("System Trajectory")
     plt.xlabel("x [AU]")
     plt.ylabel("y [AU]")
@@ -110,7 +133,7 @@ def construct_plots():
     plt.savefig("plots/SystemTrajectory.jpg", bbox_inches = "tight")
     plt.close()
 
-    plt.plot(other_data["time"], other_data["Perturber-Binary Separation"])
+    plt.plot(data_dict["other"]["time"],data_dict["other"]["Perturber-Binary Separation"])
     plt.title("Separation Between Orbits of Perturber and Binary \n $\\tau = 10^5 T_{m_2}$")
     plt.xlabel("Time [yr]")
     plt.ylabel("Separation [AU]")
@@ -120,12 +143,13 @@ def construct_plots():
     plt.savefig("plots/DistPerturbBinary.jpg", bbox_inches = "tight")
     plt.close()
 
-    plt.plot(other_data["time"], other_data["a_perturber"])
+    plt.plot(data_dict["other"]["time"], data_dict["other"]["a_perturber"])
     plt.title("Semi-major Axis of Perturber")
     plt.xlabel("Time [yr]")
     plt.ylabel("a [AU]")
     plt.savefig("plots/PerturberSemiMajor.jpg", bbox_inches = "tight")
     plt.close()
+
 
 def animate_system_trajectory(i, ax, SMBH_scatter, perturber_scatter, BBH_1_scatter, BBH_2_scatter, trail_args):
     SMBH_scatter.set_offsets([SMBH_x[i], SMBH_y[i]])
@@ -139,7 +163,7 @@ def animate_system_trajectory(i, ax, SMBH_scatter, perturber_scatter, BBH_1_scat
             points = i
         trail.set_offsets(np.array([np.array(i) for i in zip(perturber_x[i-points:i], perturber_y[i-points:i])]))
 
-    ax.set_title(f"Animated System Trajectory \n t = {np.round(BBH_1_data['time'][i], 3)} yr")
+    ax.set_title(f"Animated System Trajectory \n t = {np.round(data_dict['BBH_1']['time'][i], 3)} yr")
 
 
 def animate_binary_trajectory(i, ax, BBH_1_scatter, BBH_2_scatter, trail_args):
@@ -151,10 +175,11 @@ def animate_binary_trajectory(i, ax, BBH_1_scatter, BBH_2_scatter, trail_args):
     if i > 0:
         if trail_points >= i:
             trail_points = i
-        BBH_1_trail.set_offsets(np.array([np.array(i) for i in zip(BBH_1_barycentric_x[i-trail_points:i],  BBH_1_barycentric_y[i-trail_points:i])]))
+        BBH_1_trail.set_offsets(np.array([np.array(i) for i in zip(BBH_1_barycentric_x[i - trail_points:i], BBH_1_barycentric_y[i - trail_points:i])]))
         BBH_2_trail.set_offsets(np.array([np.array(i) for i in zip(BBH_2_barycentric_x[i - trail_points:i], BBH_2_barycentric_y[i - trail_points:i])]))
 
-    ax.set_title(f"Animated Binary Trajectory \n t = {np.round(BBH_1_data['time'][i], 3)} yr")
+    ax.set_title(f"Animated Binary Trajectory \n t = {np.round(data_dict['BBH_1']['time'][i], 3)} yr")
+
 
 def generate_binary_trajectory_animation():
 
@@ -175,7 +200,7 @@ def generate_binary_trajectory_animation():
     plt.title("Animated Binary Trajectory")
     plt.legend(loc = "upper right")
 
-    animation = FuncAnimation(fig, animate_binary_trajectory, interval = 100, fargs = (ax, BBH_1_scatter, BBH_2_scatter, (BBH_1_trail, BBH_2_trail, trail_points)))
+    animation = FuncAnimation(fig, animate_binary_trajectory, frames = len(BBH_1_barycentric_x), interval = 100, fargs = (ax, BBH_1_scatter, BBH_2_scatter, (BBH_1_trail, BBH_2_trail, trail_points)))
 
     animation.save("plots/BinaryTrajectory.mp4")
 
@@ -200,7 +225,7 @@ def generate_system_trajectory_animation():
     plt.title("Animated System Trajectory")
     plt.legend(loc = "upper right")
 
-    animation = FuncAnimation(fig, animate_system_trajectory, interval = 30, fargs = (ax, SMBH_scatter, perturber_scatter, BBH_1_scatter, BBH_2_scatter, (perturber_trail, trail_points)))
+    animation = FuncAnimation(fig, animate_system_trajectory, frames = len(SMBH_x), interval = 100, fargs = (ax, SMBH_scatter, perturber_scatter, BBH_1_scatter, BBH_2_scatter, (perturber_trail, trail_points)))
 
     animation.save("plots/SystemTrajectory.mp4")
 
