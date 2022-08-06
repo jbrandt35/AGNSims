@@ -4,6 +4,10 @@ import numpy as np
 from numpy.linalg import norm as mag
 from astropy import constants
 import pandas as pd
+import os
+import h5py
+
+data_objects = ["BBH_1", "BBH_2", "SMBH", "perturber"]
 
 m0, m1_a, m1_b, m2 = 10 ** 6, 10, 10, 20
 c = constants.c.to("AU/yr").value
@@ -234,6 +238,7 @@ def dist_between(particle_1, particle_2):
     particle_1_position, particle_2_position = np.array(particle_1.xyz), np.array(particle_2.xyz)
     return mag(particle_1_position - particle_2_position)
 
+
 def get_perturber_binary_separation(binary_COM, perturber):
 
     virtual_sim = create_simulation()
@@ -272,48 +277,38 @@ def check_and_assign_minimums(sim, record):
     if relative_tGW < record["Minimum relative t_GW"]:
         record["Minimum relative t_GW"] = relative_tGW
 
+
 def initialize_data_collection():
-    for BH in ["SMBH", "BBH_1", "BBH_2", "perturber"]:
-        with open(f"data/{BH}_data.csv", "w") as file:
-            file.write(",".join(["time", "x", "y", "z", "vx", "vy", "vz"]) + "\n")
+    os.system("rm -r -f result")
+    os.system("mkdir result")
 
-    with open("data/binary_data.csv", "w") as file:
-        file.write(",".join(["time", "x", "y", "z", "vx", "vy", "vz", "Eccentricity"]) + "\n")
-
-    with open("data/other_data.csv", "w") as file:
-        file.write(",".join(["time", "Perturber-Binary Separation", "a_perturber", "Time-Step"]) + "\n")
-
-
-def establish_BH_dataframes():
-    BH_df = pd.DataFrame(columns = ["time", "x", "y", "z", "vx", "vy", "vz"])
-
-    SMBH_df = BH_df.copy(deep = True)
-    BBH_1_df = BH_df.copy(deep = True)
-    BBH_2_df = BH_df.copy(deep = True)
-    perturber_df = BH_df.copy(deep = True)
-
-    return [("SMBH", SMBH_df), ("BBH_1", BBH_1_df), ("BBH_2", BBH_2_df), ("perturber", perturber_df)]
 
 def save_in_frame(frame, data):
     frame.loc[len(frame.index)] = data
 
 
 def save_data(sim):
-    for hash, frame in establish_BH_dataframes():
-        data = [sim.t] + sim.particles[hash].xyz + sim.particles[hash].vxyz
-        save_in_frame(frame, data)
-        frame.to_csv(f"data/{hash}_data.csv", mode = "a", header = False, index = False)
+    with pd.HDFStore("result/data.h5") as data_file:
+        for particle in data_objects:
+            data_file.append(f"/Positions/{particle}", pd.DataFrame(data = [sim.particles[particle].xyz], columns = ["x", "y", "z"]))
 
-    binary_df = pd.DataFrame(columns = ["time", "x", "y", "z", "vx", "vy", "vz", "Eccentricity"])
-    binary_COM = sim.calculate_com(first = 1, last = 3)
-    data = [sim.t] + binary_COM.xyz + binary_COM.vxyz + [sim.particles["BBH_2"].calculate_orbit(primary = sim.particles["BBH_1"]).e]
-    save_in_frame(binary_df, data)
-    binary_df.to_csv("data/binary_data.csv", mode = "a", header = False)
-
-    other_df = pd.DataFrame(columns = ["time", "Perturber-Binary Separation", "a_perturber", "Time-Step"])
-    data = [sim.t] + [get_perturber_binary_separation(binary_COM, sim.particles["perturber"])] + [sim.particles["perturber"].calculate_orbit(primary = sim.particles["SMBH"]).a] + [sim.dt]
-    save_in_frame(other_df, data)
-    other_df.to_csv("data/other_data.csv", mode = "a", header = False)
+    #
+    # #
+    # # for par:
+    # #     data = [sim.t] + sim.particles[hash].xyz + sim.particles[hash].vxyz
+    # #     save_in_frame(frame, data)
+    # #     frame.to_csv(f"data/{hash}_data.csv", mode = "a", header = False, index = False)
+    #
+    # binary_df = pd.DataFrame(columns = ["time", "x", "y", "z", "vx", "vy", "vz", "Eccentricity"])
+    # binary_COM = sim.calculate_com(first = 1, last = 3)
+    # data = [sim.t] + binary_COM.xyz + binary_COM.vxyz + [sim.particles["BBH_2"].calculate_orbit(primary = sim.particles["BBH_1"]).e]
+    # save_in_frame(binary_df, data)
+    # binary_df.to_csv("data/binary_data.csv", mode = "a", header = False)
+    #
+    # other_df = pd.DataFrame(columns = ["time", "Perturber-Binary Separation", "a_perturber", "Time-Step"])
+    # data = [sim.t] + [get_perturber_binary_separation(binary_COM, sim.particles["perturber"])] + [sim.particles["perturber"].calculate_orbit(primary = sim.particles["SMBH"]).a] + [sim.dt]
+    # save_in_frame(other_df, data)
+    # other_df.to_csv("data/other_data.csv", mode = "a", header = False)
 
 
 class UnboundException(Exception):
