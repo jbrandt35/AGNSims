@@ -283,32 +283,13 @@ def initialize_data_collection():
     os.system("mkdir result")
 
 
-def save_in_frame(frame, data):
-    frame.loc[len(frame.index)] = data
-
-
 def save_data(sim):
+    binary_COM = sim.calculate_com(first = 1, last = 3)
     with pd.HDFStore("result/data.h5") as data_file:
         for particle in data_objects:
             data_file.append(f"/Positions/{particle}", pd.DataFrame(data = [sim.particles[particle].xyz], columns = ["x", "y", "z"]))
-
-    #
-    # #
-    # # for par:
-    # #     data = [sim.t] + sim.particles[hash].xyz + sim.particles[hash].vxyz
-    # #     save_in_frame(frame, data)
-    # #     frame.to_csv(f"data/{hash}_data.csv", mode = "a", header = False, index = False)
-    #
-    # binary_df = pd.DataFrame(columns = ["time", "x", "y", "z", "vx", "vy", "vz", "Eccentricity"])
-    # binary_COM = sim.calculate_com(first = 1, last = 3)
-    # data = [sim.t] + binary_COM.xyz + binary_COM.vxyz + [sim.particles["BBH_2"].calculate_orbit(primary = sim.particles["BBH_1"]).e]
-    # save_in_frame(binary_df, data)
-    # binary_df.to_csv("data/binary_data.csv", mode = "a", header = False)
-    #
-    # other_df = pd.DataFrame(columns = ["time", "Perturber-Binary Separation", "a_perturber", "Time-Step"])
-    # data = [sim.t] + [get_perturber_binary_separation(binary_COM, sim.particles["perturber"])] + [sim.particles["perturber"].calculate_orbit(primary = sim.particles["SMBH"]).a] + [sim.dt]
-    # save_in_frame(other_df, data)
-    # other_df.to_csv("data/other_data.csv", mode = "a", header = False)
+        data_file.append(f"Misc", pd.DataFrame(data = [[sim.t, sim.dt, sim.particles["BBH_2"].calculate_orbit(primary = sim.particles["BBH_1"]).e, get_perturber_binary_separation(binary_COM, sim.particles["perturber"]), sim.particles["perturber"].calculate_orbit(primary = sim.particles["SMBH"]).a]], columns = ["time", "time-step", "binary eccentricity", "perturber-binary separation", "a_perturber"]))
+        data_file.append(f"Positions/Binary", pd.DataFrame(data = [binary_COM.xyz], columns = ["x", "y", "z"]))
 
 
 class UnboundException(Exception):
