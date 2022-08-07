@@ -6,11 +6,16 @@ from numpy.linalg import norm as mag
 import os
 
 
-data_objects = ["BBH_1", "BBH_2", "SMBH", "perturber", "binary", "other"]
+data_objects = ["BBH_1", "BBH_2", "SMBH", "perturber", "binary"]
 
 
-def read_data(object):
-    data = pd.read_csv(f"data/{object}_data.csv")
+def get_position_data(particle):
+    data = pd.read_hdf("result/data.h5", key = f"Positions/{particle}")
+    return data
+
+
+def get_misc_data():
+    data = pd.read_hdf("result/data.h5", key = "Misc")
     return data
 
 
@@ -45,9 +50,14 @@ def get_last_time(df):
 
 
 def generate_data():
-    d = {}
+    d = {"Misc": get_misc_data()}
     for name in data_objects:
-        d[name] = read_data(name)
+        df = get_position_data(name)
+        try:
+            df["time"] = d["Misc"]["time"].values
+        except ValueError:
+            df["time"] = d["Misc"]["time"].values[:-1]
+        d[name] = df
     return d
 
 
@@ -84,7 +94,7 @@ def distance(p1, p2):
 
 def construct_plots():
 
-    plt.plot(data_dict["other"]["time"], data_dict["other"]["Time-Step"])
+    plt.plot(data_dict["Misc"]["time"], data_dict["Misc"]["time-step"])
     plt.xlabel("Time [yr]")
     plt.ylabel("dt [yr]")
     plt.title("Time-step over Time")
@@ -99,7 +109,7 @@ def construct_plots():
     plt.savefig("plots/time_vs_binary_distance.jpg", bbox_inches = "tight")
     plt.close()
 
-    plt.plot(data_dict["binary"]["time"], data_dict["binary"]["Eccentricity"])
+    plt.plot(data_dict["binary"]["time"], data_dict["Misc"]["binary eccentricity"])
     plt.xlabel("Time [yr]")
     plt.ylabel("Eccentricity")
     plt.title("Eccentricity of the Binary in the Barycentric Frame over Time")
@@ -133,7 +143,7 @@ def construct_plots():
     plt.savefig("plots/SystemTrajectory.jpg", bbox_inches = "tight")
     plt.close()
 
-    plt.plot(data_dict["other"]["time"],data_dict["other"]["Perturber-Binary Separation"])
+    plt.plot(data_dict["Misc"]["time"],data_dict["Misc"]["perturber-binary separation"])
     plt.title("Separation Between Orbits of Perturber and Binary \n $\\tau = 10^5 T_{m_2}$")
     plt.xlabel("Time [yr]")
     plt.ylabel("Separation [AU]")
@@ -143,7 +153,7 @@ def construct_plots():
     plt.savefig("plots/DistPerturbBinary.jpg", bbox_inches = "tight")
     plt.close()
 
-    plt.plot(data_dict["other"]["time"], data_dict["other"]["a_perturber"])
+    plt.plot(data_dict["Misc"]["time"], data_dict["Misc"]["a_perturber"])
     plt.title("Semi-major Axis of Perturber")
     plt.xlabel("Time [yr]")
     plt.ylabel("a [AU]")

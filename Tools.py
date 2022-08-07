@@ -286,10 +286,10 @@ def initialize_data_collection():
 def save_data(sim):
     binary_COM = sim.calculate_com(first = 1, last = 3)
     with pd.HDFStore("result/data.h5") as data_file:
+        data_file.append(f"Misc", pd.DataFrame(data = [[sim.t, sim.dt, sim.particles["BBH_2"].calculate_orbit(primary = sim.particles["BBH_1"]).e, get_perturber_binary_separation(binary_COM, sim.particles["perturber"]), sim.particles["perturber"].calculate_orbit(primary = sim.particles["SMBH"]).a]], columns = ["time", "time-step", "binary eccentricity", "perturber-binary separation", "a_perturber"]))
+        data_file.append(f"Positions/binary", pd.DataFrame(data = [binary_COM.xyz], columns = ["x", "y", "z"]))
         for particle in data_objects:
             data_file.append(f"/Positions/{particle}", pd.DataFrame(data = [sim.particles[particle].xyz], columns = ["x", "y", "z"]))
-        data_file.append(f"Misc", pd.DataFrame(data = [[sim.t, sim.dt, sim.particles["BBH_2"].calculate_orbit(primary = sim.particles["BBH_1"]).e, get_perturber_binary_separation(binary_COM, sim.particles["perturber"]), sim.particles["perturber"].calculate_orbit(primary = sim.particles["SMBH"]).a]], columns = ["time", "time-step", "binary eccentricity", "perturber-binary separation", "a_perturber"]))
-        data_file.append(f"Positions/Binary", pd.DataFrame(data = [binary_COM.xyz], columns = ["x", "y", "z"]))
 
 
 class UnboundException(Exception):
