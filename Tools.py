@@ -208,8 +208,8 @@ def check_for_collisions(sim, w, record):
 
     r_p = first_term * second_term * third_term * (sim.G/(c**2))
 
-    m1_a_distance = BH_a.calculate_orbit(primary = perturber).d
-    m1_b_distance = BH_b.calculate_orbit(primary = perturber).d
+    m1_a_distance = perturber.calculate_orbit(primary = BH_a).d
+    m1_b_distance = perturber.calculate_orbit(primary = BH_b).d
 
     if m1_a_distance < r_p:
         record["Result"] = f"Collision Encountered: The distance between m1_a and m2 was {m1_a_distance} AU when r_p was {r_p} AU."
