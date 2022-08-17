@@ -222,11 +222,6 @@ def check_for_collisions(sim, w, record):
         raise CollisionException(record["Result"])
 
 
-def dump_record(record):
-    with open("outcome.json", "w") as file:
-        json.dump(record, file)
-
-
 def check_binary_bound(sim, record):
     if not is_bound(sim.particles["BBH_1"], sim.particles["BBH_2"]):
         record["Result"] = f"Unbound: Binary eccentricity reached {sim.particles['BBH_2'].calculate_orbit(primary = sim.particles['BBH_1']).e}"
@@ -277,10 +272,10 @@ def check_and_assign_minimums(sim, record):
     if relative_tGW < record["Minimum relative t_GW"]:
         record["Minimum relative t_GW"] = relative_tGW
 
-
 def initialize_data_collection():
     os.system("rm -r -f result")
     os.system("mkdir result")
+
 
 def save_to_frame(df, data):
     df.loc[len(df.index)] = data
@@ -301,7 +296,8 @@ def save_data_to_disk():
         data_file.append("Misc", buffers["Misc"])
         data_file.append(f"Positions/binary", buffers["binary"])
         for particle in data_objects:
-            data_file.append(f"/Positions/{particle}", buffers["particle"])
+            data_file.append(f"/Positions/{particle}", buffers[particle])
+
 
 def clear_buffer():
     buffers["Misc"] = pd.DataFrame(columns = ["time", "time-step", "binary eccentricity", "perturber-binary separation", "a_perturber"])
@@ -309,14 +305,23 @@ def clear_buffer():
     for particle in data_objects:
         buffers[particle] = pd.DataFrame(columns = ["x", "y", "z"])
 
+
 def save_data(sim):
     save_data_to_buffer(sim)
-    if len(buffers["Misc"]) >= 10000:
+    if buffers["Misc"].shape[0] >= 1000:
         save_data_to_disk()
         clear_buffer()
 
+
+def dump_record(record):
+    with open("outcome.json", "w") as file:
+        json.dump(record, file)
+    save_data_to_disk()
+
+
 class UnboundException(Exception):
     pass
+
 
 class CollisionException(Exception):
     pass
@@ -330,7 +335,7 @@ outcome_record = {"Result": None, "Minimum Distance Between Binary COM and Pertu
 total_time_steps_completed = 0
 
 buffers = {
-    "Misc": pd.DataFrame(columns = ["time", "time-step", "binary eccentricity", "perturber-binary separation", "a_perturber"])
+    "Misc": pd.DataFrame(columns = ["time", "time-step", "binary eccentricity", "perturber-binary separation", "a_perturber"]),
     "binary": pd.DataFrame(columns = ["x", "y", "z"])
 }
 for particle in data_objects:

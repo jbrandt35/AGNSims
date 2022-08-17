@@ -94,6 +94,8 @@ def distance(p1, p2):
 
 def construct_plots():
 
+    os.system("mkdir -p plots")
+
     plt.plot(data_dict["Misc"]["time"], data_dict["Misc"]["time-step"])
     plt.xlabel("Time [yr]")
     plt.ylabel("dt [yr]")
@@ -102,7 +104,7 @@ def construct_plots():
     plt.savefig("plots/time_vs_dt.jpg", bbox_inches = "tight")
     plt.close()
 
-    plt.plot(data_dict["BBH_1"]["time"], distance(data_dict["BBH_1"],data_dict["BBH_2"]))
+    plt.plot(data_dict["BBH_1"]["time"], distance(data_dict["BBH_1"], data_dict["BBH_2"]))
     plt.xlabel("Time [yr]")
     plt.ylabel("Distance [AU]")
     plt.title("Distance Between BHs in Binary over Time")
@@ -235,7 +237,7 @@ def generate_system_trajectory_animation():
     plt.title("Animated System Trajectory")
     plt.legend(loc = "upper right")
 
-    animation = FuncAnimation(fig, animate_system_trajectory, frames = len(SMBH_x), interval = 100, fargs = (ax, SMBH_scatter, perturber_scatter, BBH_1_scatter, BBH_2_scatter, (perturber_trail, trail_points)))
+    animation = FuncAnimation(fig, animate_system_trajectory, frames = len(SMBH_x), interval = 500, fargs = (ax, SMBH_scatter, perturber_scatter, BBH_1_scatter, BBH_2_scatter, (perturber_trail, trail_points)))
 
     animation.save("plots/SystemTrajectory.mp4")
 
