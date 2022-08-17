@@ -282,15 +282,38 @@ def initialize_data_collection():
     os.system("rm -r -f result")
     os.system("mkdir result")
 
+def save_to_frame(df, data):
+    df.loc[len(df.index)] = data
+
+
+def save_data_to_buffer(sim):
+    binary_COM = sim.calculate_com(first = 1, last = 3)
+
+    save_to_frame(buffers["Misc"], [sim.t, sim.dt, sim.particles["BBH_2"].calculate_orbit(primary = sim.particles["BBH_1"]).e, get_perturber_binary_separation(binary_COM, sim.particles["perturber"]), sim.particles["perturber"].calculate_orbit(primary = sim.particles["SMBH"]).a])
+    save_to_frame(buffers["binary"], binary_COM.xyz)
+
+    for particle in data_objects:
+        save_to_frame(buffers[particle], sim.particles[particle].xyz)
+
+
+def save_data_to_disk():
+    with pd.HDFStore("result/data.h5") as data_file:
+        data_file.append("Misc", buffers["Misc"])
+        data_file.append(f"Positions/binary", buffers["binary"])
+        for particle in data_objects:
+            data_file.append(f"/Positions/{particle}", buffers["particle"])
+
+def clear_buffer():
+    buffers["Misc"] = pd.DataFrame(columns = ["time", "time-step", "binary eccentricity", "perturber-binary separation", "a_perturber"])
+    buffers["binary"] = pd.DataFrame(columns = ["x", "y", "z"])
+    for particle in data_objects:
+        buffers[particle] = pd.DataFrame(columns = ["x", "y", "z"])
 
 def save_data(sim):
-    binary_COM = sim.calculate_com(first = 1, last = 3)
-    with pd.HDFStore("result/data.h5") as data_file:
-        data_file.append(f"Misc", pd.DataFrame(data = [[sim.t, sim.dt, sim.particles["BBH_2"].calculate_orbit(primary = sim.particles["BBH_1"]).e, get_perturber_binary_separation(binary_COM, sim.particles["perturber"]), sim.particles["perturber"].calculate_orbit(primary = sim.particles["SMBH"]).a]], columns = ["time", "time-step", "binary eccentricity", "perturber-binary separation", "a_perturber"]))
-        data_file.append(f"Positions/binary", pd.DataFrame(data = [binary_COM.xyz], columns = ["x", "y", "z"]))
-        for particle in data_objects:
-            data_file.append(f"/Positions/{particle}", pd.DataFrame(data = [sim.particles[particle].xyz], columns = ["x", "y", "z"]))
-
+    save_data_to_buffer(sim)
+    if len(buffers["Misc"]) >= 10000:
+        save_data_to_disk()
+        clear_buffer()
 
 class UnboundException(Exception):
     pass
@@ -305,5 +328,12 @@ outcome_record = {"Result": None, "Minimum Distance Between Binary COM and Pertu
                   "Minimum Distance Between BBHs": np.inf, "Minimum t_GW": np.inf, "Minimum relative t_GW": np.inf}
 
 total_time_steps_completed = 0
+
+buffers = {
+    "Misc": pd.DataFrame(columns = ["time", "time-step", "binary eccentricity", "perturber-binary separation", "a_perturber"])
+    "binary": pd.DataFrame(columns = ["x", "y", "z"])
+}
+for particle in data_objects:
+    buffers[particle] = pd.DataFrame(columns = ["x", "y", "z"])
 #####################################################################################
 
