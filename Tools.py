@@ -308,10 +308,9 @@ def clear_buffer():
 
 def save_data(sim):
     save_data_to_buffer(sim)
-    if buffers["Misc"].shape[0] >= 1000:
+    if buffers["Misc"].shape[0] >= 10000:
         save_data_to_disk()
         clear_buffer()
-
 
 def dump_record(record):
     with open("outcome.json", "w") as file:
