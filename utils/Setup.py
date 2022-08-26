@@ -3,8 +3,8 @@ import numpy as np
 from time import sleep
 import sys
 
-perturber_separation_range = (2.5, 10, 0.25)
-BBH_separation_range = (0.1, 0.5, 0.02)
+perturber_separation_range = (2.5, 5.5, 0.25)
+BBH_separation_range = (0.1, 0.1, 0.02)
 num_in_each = 100
 
 
@@ -12,7 +12,7 @@ perturber_separation_range = np.array(list(range(int(100 * perturber_separation_
 BBH_separation_range = np.array(list(range(int(100 * BBH_separation_range[0]), int(100 * (BBH_separation_range[1] + BBH_separation_range[2])), int(100 * BBH_separation_range[2])))) / 100
 
 
-def return_bash(script, path = "/storage/home/hhive1/jbrandt35/data/AGN_sims/heatmap/utils"):
+def return_bash(script, path = "utils"):
     working_dir = os.getcwd()
     os.chdir(path)
     output_stream = os.popen("./" + script)
@@ -22,7 +22,7 @@ def return_bash(script, path = "/storage/home/hhive1/jbrandt35/data/AGN_sims/hea
     return int(output)
 
 
-def run_bash(script, options, path = "/storage/home/hhive1/jbrandt35/data/AGN_sims/heatmap/utils"):
+def run_bash(script, options, path = "utils"):
     working_dir = os.getcwd()
     os.chdir(path)
     os.system(f"sh {script} {options}")

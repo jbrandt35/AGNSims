@@ -4,8 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="08267df2-a408-4aaf-b642-4d2d1269041b" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/utils/submit.pbs" beforeDir="false" afterPath="$PROJECT_DIR$/utils/submit.pbs" afterDir="false" />
+    <list default="true" id="a276a7a2-3d76-4749-9db3-30bca0df140d" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/Setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/Setup.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/utils/build.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
