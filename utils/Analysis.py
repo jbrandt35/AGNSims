@@ -1,6 +1,7 @@
 import os
 import matplotlib.pyplot as plt
 import numpy as np
+import json
 import pandas as pd
 import seaborn as sns
 import matplotlib.ticker as ticker
@@ -8,7 +9,8 @@ from matplotlib.colors import LogNorm
 import matplotlib as mpl
 mpl.rcParams['figure.dpi'] = 300
 
-run_dir = "/storage/home/hhive1/jbrandt35/data/AGN_sims/heatmap/runs"
+run_dir = "/storage/home/hhive1/jbrandt35/data/AGN_sims/gr_heatmap/runs"
+plot_dir = "/".join(run_dir.split("/")[:-1]) + "/plots"
 
 perturber_separation_range = (2.5, 10, 0.25)
 BBH_separation_range = (0.1, 0.5, 0.02)
@@ -16,7 +18,7 @@ BBH_separation_range = (0.1, 0.5, 0.02)
 perturber_separation_range = np.array(list(range(int(100 * perturber_separation_range[0]), int(100 * (perturber_separation_range[1] + perturber_separation_range[2])), int(100 * perturber_separation_range[2])))) / 100
 BBH_separation_range = np.array(list(range(int(100 * BBH_separation_range[0]), int(100 * (BBH_separation_range[1] + BBH_separation_range[2])), int(100 * BBH_separation_range[2])))) / 100
 
-
+os.system("mkdir -p ../plots")
 #########################Create Data Frames to Hold Data##########################################
 
 empty_data = np.empty((len(perturber_separation_range), len(BBH_separation_range)))
@@ -70,69 +72,62 @@ for BBH_separation in BBH_separation_range:
 
         for i in run_numbers:
 
-            outcome_file = os.path.join(directory, str(i), "outcome.txt")
+            outcome_file = os.path.join(directory, str(i), "outcome.json")
 
             if os.path.exists(outcome_file):
 
-                file = open(outcome_file)
-                lines = file.readlines()
+                outcome = json.load(open(outcome_file))
 
                 ended_bound = True
 
-                for line in lines:
+            #  Check Bounded-ness  #
 
-                #  Check Bounded-ness  #
-
-                    if "Unbound" in line:
-                        bound_outcomes.append(1)
-                        merged_outcomes.append(0)
-                        ejected_outcomes.append(1)
-                        total_outcomes["Binary Unbound ($e>1$)"] += 1
-                        ended_bound = False
-                    elif "The simulation ended with the binary bound and no mergers." in line:
-                        bound_outcomes.append(0)
-                        merged_outcomes.append(0)
-                        ejected_outcomes.append(0)
-                        total_outcomes["Reached $10^5$ Periods"] += 1
-                    elif "Collision Encountered" in line:
-                        bound_outcomes.append(1)
-                        merged_outcomes.append(1)
-                        ejected_outcomes.append(0)
-                        if "when the sum of event horizon radii was" in line:
-                            print(f"A collision occured! For BBH separation {BBH_separation} with m2 separation {perturber_separation}, run {i}: m1a and m1b crossed event horizons.")
-                            total_outcomes["Event Horizons Crossed"] += 1
-                        if "t_GW was" in line:
-                            print(
-                                f"A collision occured! For BBH separation {BBH_separation} with m2 separation {perturber_separation}, run {i}: t_GW fell below the period.")
-                            total_outcomes["$t_{\mathregular{GW}}$ < Period"] += 1
-                        if "The distance between m1_a and m2" in line:
-                            print(
-                                f"A collision occured! For BBH separation {BBH_separation} with m2 separation {perturber_separation}, run {i}: m1a and m2 merged.")
-                            total_outcomes["$m_2$ merged with binary"] += 1
-                        if "he distance between m1_b and m2" in line:
-                            print(
-                                f"A collision occured! For BBH separation {BBH_separation} with m2 separation {perturber_separation}, run {i}: m1b and m2 merged.")
-                            total_outcomes["$m_2$ merged with binary"] += 1
+                if "Unbound" in outcome["Result"]:
+                    bound_outcomes.append(1)
+                    merged_outcomes.append(0)
+                    ejected_outcomes.append(1)
+                    total_outcomes["Binary Unbound ($e>1$)"] += 1
+                    ended_bound = False
+                elif "The simulation ended with the binary bound and no mergers." in outcome["Result"]:
+                    bound_outcomes.append(0)
+                    merged_outcomes.append(0)
+                    ejected_outcomes.append(0)
+                    total_outcomes["Reached $10^5$ Periods"] += 1
+                elif "Collision Encountered" in outcome["Result"]:
+                    bound_outcomes.append(1)
+                    merged_outcomes.append(1)
+                    ejected_outcomes.append(0)
+                    if "when the sum of event horizon radii was" in outcome["Result"]:
+                        print(f"A collision occured! For BBH separation {BBH_separation} with m2 separation {perturber_separation}, run {i}: m1a and m1b crossed event horizons.")
+                        total_outcomes["Event Horizons Crossed"] += 1
+                    if "t_GW was" in outcome["Result"]:
+                        print(
+                            f"A collision occured! For BBH separation {BBH_separation} with m2 separation {perturber_separation}, run {i}: t_GW fell below the period.")
+                        total_outcomes["$t_{\mathregular{GW}}$ < Period"] += 1
+                    if "The distance between m1_a and m2" in outcome["Result"]:
+                        print(
+                            f"A collision occured! For BBH separation {BBH_separation} with m2 separation {perturber_separation}, run {i}: m1a and m2 merged.")
+                        total_outcomes["$m_2$ merged with binary"] += 1
+                    if "he distance between m1_b and m2" in outcome["Result"]:
+                        print(
+                            f"A collision occured! For BBH separation {BBH_separation} with m2 separation {perturber_separation}, run {i}: m1b and m2 merged.")
+                        total_outcomes["$m_2$ merged with binary"] += 1
 
 
-                    #***** T_GW STUFF MAY NEED TO BE CHANGED DEPENDING ON NEW IMPLEMENTATION  ******
-                    #  Store t_GW  #
-                    if "Min t_GW:" in line and ended_bound:
-                        min_t_GW = float(line.split(":")[1].strip())
-                        t_GWs.append(min_t_GW)
-                        all_min_t_GWs.append(min_t_GW)
+                #  Store t_GW  #
+                if ended_bound:
+                    min_t_GW = outcome["Minimum t_GW"]
+                    t_GWs.append(min_t_GW)
+                    all_min_t_GWs.append(min_t_GW)
 
-                    if "Min relative t_GW" in line and ended_bound:
-                        min_relative_t_GW = float(line.split(":")[1].strip())
-                        relative_t_GWs.append(min_relative_t_GW)
+                    min_relative_t_GW = outcome["Minimum relative t_GW"]
+                    relative_t_GWs.append(min_relative_t_GW)
 
-                    if "Min distance binary COM -> perturber:" in line:
-                        min_distance_binary_perturber = float(line.split(":")[1].strip())
-                        perturber_distances.append(min_distance_binary_perturber)
+                min_distance_binary_perturber = outcome["Minimum Distance Between Binary COM and Perturber"]
+                perturber_distances.append(min_distance_binary_perturber)
 
-                    if "Min distance between BBHs:" in line:
-                        min_binary_dist = float(line.split(":")[1].strip())
-                        BBH_distances.append(min_binary_dist)
+                min_binary_dist = outcome["Minimum Distance Between BBHs"]
+                BBH_distances.append(min_binary_dist)
 
             else:
                 print(f"For BBH separation {BBH_separation} with m2 separation {perturber_separation}, run {i} didn't finish!")
@@ -221,7 +216,7 @@ ejected_heatmap.invert_yaxis()
 ejected_plot.set_xlabel("Binary Separation [$R_{\mathregular{hill, m_1}}$]")
 ejected_plot.set_title("Proportion of Binary Ejections")
 
-plt.savefig("/storage/home/hhive1/jbrandt35/data/AGN_sims/heatmap/plots/bounded_heatmaps.jpg", bbox_inches = "tight")
+plt.savefig(f"{plot_dir}/bounded_heatmaps.jpg", bbox_inches = "tight")
 plt.close()
 
 ########################## t_GW Plots ############################
@@ -254,7 +249,7 @@ t_GW_histogram.set_title("Distribution of Minimum $t_{\mathregular{GW}}$")
 t_GW_histogram.set_xlabel("Minimum $t_{\mathregular{GW}}$")
 t_GW_histogram.set_ylabel("Count")
 
-plt.savefig("/storage/home/hhive1/jbrandt35/data/AGN_sims/heatmap/plots/t_GW_plots.jpg", bbox_inches = "tight")
+plt.savefig(f"{plot_dir}/t_GW_plots.jpg", bbox_inches = "tight")
 plt.close()
 
 ########################## Distance Heatmaps ############################
@@ -274,7 +269,7 @@ perturber_heatmap.collections[0].colorbar.ax.set_title("[AU]")
 perturber_distance_plot.set_xlabel("Binary Separation [$R_{\mathregular{hill, m_1}}$]")
 perturber_distance_plot.set_title("Minimum Distance Between Binary COM & $m_2$")
 
-plt.savefig("/storage/home/hhive1/jbrandt35/data/AGN_sims/heatmap/plots/distance_heatmaps.jpg", bbox_inches = "tight")
+plt.savefig(f"{plot_dir}/distance_heatmaps.jpg", bbox_inches = "tight")
 plt.close()
 
 ########################## Outcome Pie Chart  ############################
@@ -287,5 +282,5 @@ plt.pie(counts_for_pie, labels = outcome_labels_for_pie, normalize = True, autop
 plt.gca().set_prop_cycle(None)
 plt.title("Distribution of Simulation Outcomes")
 plt.legend(plt.pie(counts_for_legend)[0], outcome_labels_for_legend, loc = "upper left", bbox_to_anchor = (-0.5, 1))
-plt.savefig("/storage/home/hhive1/jbrandt35/data/AGN_sims/heatmap/plots/outcome_pie.jpg", bbox_inches = "tight")
+plt.savefig(f"{plot_dir}/outcome_pie.jpg", bbox_inches = "tight")
 plt.close()
