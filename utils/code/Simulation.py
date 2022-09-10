@@ -3,25 +3,21 @@ from Tools import *
 perturber_a = PERTSEPARATION
 binary_separation = BINSEPARATION
 
-#####################################################################################
-
-def migration_force(reb_sim):
-    sim.particles["perturber"].ax -= sim.particles["perturber"].vx/tau
-    sim.particles["perturber"].ay -= sim.particles["perturber"].vy/tau
-    sim.particles["perturber"].az -= sim.particles["perturber"].vz/tau
-
 
 #####################################################################################
 
 sim = create_simulation()
-w = populate_simulation(sim, perturber_a = perturber_a, binary_separation = binary_separation)
+w = populate_simulation(sim, perturber_a = perturber_a, binary_separation = binary_separation, randomize_M = True)
 
 binary_period, SMBH_period, perturber_period = get_binary_period(sim), get_binary_SMBH_period(sim), get_perturber_period(sim)
 sim.dt = 0.05 * binary_period
 
-tau = 10**5 * perturber_period
-sim.additional_forces = migration_force
-sim.force_is_velocity_dependent = 1
+rebx = reboundx.Extras(sim)
+gr_radiation = rebx.load_force("gr_radiation")
+rebx.add_force(gr_radiation)
+gr_radiation.params["c"] = c
+gr_radiation.params["gr_rad_part1"] = 1
+gr_radiation.params["gr_rad_part2"] = 2
 
 initialize_data_collection()
 #####################################################################################

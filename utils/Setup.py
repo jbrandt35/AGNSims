@@ -3,8 +3,8 @@ import numpy as np
 from time import sleep
 import sys
 
-perturber_separation_range = (2.5, 5.5, 0.25)
-BBH_separation_range = (0.1, 0.1, 0.02)
+perturber_separation_range = (2.5, 10.0, 0.25)
+BBH_separation_range = (0.1, 0.5, 0.02)
 num_in_each = 100
 
 

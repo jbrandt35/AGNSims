@@ -5,6 +5,7 @@ from numpy.linalg import norm as mag
 from astropy import constants
 import pandas as pd
 import os
+import reboundx
 import h5py
 
 data_objects = ["BBH_1", "BBH_2", "SMBH", "perturber"]
