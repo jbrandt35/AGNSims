@@ -10,12 +10,12 @@ data_objects = ["BBH_1", "BBH_2", "SMBH", "perturber", "binary"]
 
 
 def get_position_data(particle):
-    data = pd.read_hdf("result/data.h5", key = f"Positions/{particle}")
+    data = pd.HDFStore("result/data.h5", complevel = 5, complib = "zlib")[f"Positions/{particle}"]
     return data
 
 
 def get_misc_data():
-    data = pd.read_hdf("result/data.h5", key = "Misc")
+    data = pd.HDFStore("result/data.h5", complevel = 5, complib = "zlib")["Misc"]
     return data
 
 

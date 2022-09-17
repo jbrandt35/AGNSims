@@ -294,10 +294,10 @@ def save_data_to_buffer(sim):
 
 def save_data_to_disk():
     with pd.HDFStore("result/data.h5") as data_file:
-        data_file.append("Misc", buffers["Misc"])
-        data_file.append(f"Positions/binary", buffers["binary"])
+        data_file.append("Misc", buffers["Misc"], complib = "zlib", complevel = 5)
+        data_file.append(f"Positions/binary", buffers["binary"], complib = "zlib", complevel = 5)
         for particle in data_objects:
-            data_file.append(f"/Positions/{particle}", buffers[particle])
+            data_file.append(f"/Positions/{particle}", buffers[particle], complib = "zlib", complevel = 5)
 
 
 def clear_buffer():
