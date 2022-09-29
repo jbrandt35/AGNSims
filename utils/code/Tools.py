@@ -155,12 +155,12 @@ def is_bound(primary, secondary):
     return bool(orbit.e < 1)
 
 
-def t_GW(sim, particle1, particle2):
+def t_GW(sim):
 
-    orbit = particle1.calculate_orbit(primary = particle2)
+    orbit = sim.particles["BBH_1"].calculate_orbit(primary = sim.particles["BBH_2"])
 
-    m1 = particle1.m
-    m2 = particle2.m
+    m1 = sim.particles["BBH_1"].m
+    m2 = sim.particles["BBH_2"].m
     a = orbit.a
     e = orbit.e
 
@@ -182,7 +182,7 @@ def check_for_collisions(sim, w, record):
     BH_b = sim.particles["BBH_2"]
 
     sum_of_event_horizons = 2 * sim.G * (BH_a.m + BH_b.m) / (c ** 2)
-    t_gw = t_GW(sim, BH_a, BH_b)
+    t_gw = t_GW(sim)
 
     orbit = BH_a.calculate_orbit(primary = BH_b)
     distance, period = orbit.d, orbit.P
@@ -261,7 +261,7 @@ def check_and_assign_minimums(sim, record):
     distance_perturber_to_binary_COM = dist_between(sim.particles["perturber"], binary_barycenter)
     distance_between_BBHs = sim.particles["BBH_2"].calculate_orbit(primary = sim.particles["BBH_1"]).d
 
-    t_gw = t_GW(sim, sim.particles["BBH_1"], sim.particles["BBH_2"])
+    t_gw = t_GW(sim)
     relative_tGW = t_gw / get_binary_period(sim)
 
     if distance_between_BBHs < record["Minimum Distance Between BBHs"]:
@@ -286,7 +286,7 @@ def save_data_to_buffer(sim):
     binary_COM = sim.calculate_com(first = 1, last = 3)
 
     save_to_frame(buffers["Misc"], [sim.t, sim.dt, sim.particles["BBH_2"].calculate_orbit(primary = sim.particles["BBH_1"]).e, get_perturber_binary_separation(binary_COM, sim.particles["perturber"]), sim.particles["perturber"].calculate_orbit(primary = sim.particles["SMBH"]).a])
-    save_to_frame(buffers["binary"], binary_COM.xyz)
+    save_to_frame(buffers["binary"], [binary_COM.xyz, t_GW(sim), sim.particles["BBH_1"].calculate_orbit(primary = sim.particles["BBH_2"]).a])
 
     for particle in data_objects:
         save_to_frame(buffers[particle], sim.particles[particle].xyz)
@@ -302,7 +302,7 @@ def save_data_to_disk():
 
 def clear_buffer():
     buffers["Misc"] = pd.DataFrame(columns = ["time", "time-step", "binary eccentricity", "perturber-binary separation", "a_perturber"])
-    buffers["binary"] = pd.DataFrame(columns = ["x", "y", "z"])
+    buffers["binary"] = pd.DataFrame(columns = ["x", "y", "z", "t_GW", "a"])
     for particle in data_objects:
         buffers[particle] = pd.DataFrame(columns = ["x", "y", "z"])
 
@@ -336,7 +336,7 @@ total_time_steps_completed = 0
 
 buffers = {
     "Misc": pd.DataFrame(columns = ["time", "time-step", "binary eccentricity", "perturber-binary separation", "a_perturber"]),
-    "binary": pd.DataFrame(columns = ["x", "y", "z"])
+    "binary": pd.DataFrame(columns = ["x", "y", "z", "t_GW", "a"])
 }
 for particle in data_objects:
     buffers[particle] = pd.DataFrame(columns = ["x", "y", "z"])
