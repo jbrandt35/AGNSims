@@ -42,6 +42,8 @@ def get_binary_COM_data(m_SMBH, m_binary, a, e = 0, M = 0, inc = 0):
     #Get its Hill Radius
     R_hill = virtual_sim.particles["binary_COM"].rhill
 
+    print(R_hill)
+
     return position, velocity, R_hill
 
 
@@ -286,10 +288,10 @@ def save_data_to_buffer(sim):
     binary_COM = sim.calculate_com(first = 1, last = 3)
 
     save_to_frame(buffers["Misc"], [sim.t, sim.dt, sim.particles["BBH_2"].calculate_orbit(primary = sim.particles["BBH_1"]).e, get_perturber_binary_separation(binary_COM, sim.particles["perturber"]), sim.particles["perturber"].calculate_orbit(primary = sim.particles["SMBH"]).a])
-    save_to_frame(buffers["binary"], [binary_COM.xyz, t_GW(sim), sim.particles["BBH_1"].calculate_orbit(primary = sim.particles["BBH_2"]).a])
+    save_to_frame(buffers["binary"], [binary_COM.x, binary_COM.y, binary_COM.z, t_GW(sim), sim.particles["BBH_1"].calculate_orbit(primary = sim.particles["BBH_2"]).a, binary_COM.vx, binary_COM.vy, binary_COM.vz])
 
     for particle in data_objects:
-        save_to_frame(buffers[particle], sim.particles[particle].xyz)
+        save_to_frame(buffers[particle], [sim.particles[particle].x, sim.particles[particle].y, sim.particles[particle].z, sim.particles[particle].vx, sim.particles[particle].vy, sim.particles[particle].vz])
 
 
 def save_data_to_disk():
@@ -302,9 +304,9 @@ def save_data_to_disk():
 
 def clear_buffer():
     buffers["Misc"] = pd.DataFrame(columns = ["time", "time-step", "binary eccentricity", "perturber-binary separation", "a_perturber"])
-    buffers["binary"] = pd.DataFrame(columns = ["x", "y", "z", "t_GW", "a"])
+    buffers["binary"] = pd.DataFrame(columns = ["x", "y", "z", "t_GW", "a", "vx", "vy", "vz"])
     for particle in data_objects:
-        buffers[particle] = pd.DataFrame(columns = ["x", "y", "z"])
+        buffers[particle] = pd.DataFrame(columns = ["x", "y", "z", "vx", "vy", "vz"])
 
 
 def save_data(sim):
@@ -336,9 +338,9 @@ total_time_steps_completed = 0
 
 buffers = {
     "Misc": pd.DataFrame(columns = ["time", "time-step", "binary eccentricity", "perturber-binary separation", "a_perturber"]),
-    "binary": pd.DataFrame(columns = ["x", "y", "z", "t_GW", "a"])
+    "binary": pd.DataFrame(columns = ["x", "y", "z", "t_GW", "a", "vx", "vy", "vz"])
 }
 for particle in data_objects:
-    buffers[particle] = pd.DataFrame(columns = ["x", "y", "z"])
+    buffers[particle] = pd.DataFrame(columns = ["x", "y", "z", "vx", "vy", "vz"])
 #####################################################################################
 

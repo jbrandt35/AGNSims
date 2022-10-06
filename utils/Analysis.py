@@ -12,8 +12,8 @@ mpl.rcParams['figure.dpi'] = 300
 run_dir = "/storage/home/hhive1/jbrandt35/data/AGN_sims/gr_heatmap/runs"
 plot_dir = "/".join(run_dir.split("/")[:-1]) + "/plots"
 
-perturber_separation_range = (2.5, 10, 0.25)
-BBH_separation_range = (0.1, 0.5, 0.02)
+perturber_separation_range = (2.5, 3.5, 0.25)
+BBH_separation_range = (0.1, 0.4, 0.02)
 
 perturber_separation_range = np.array(list(range(int(100 * perturber_separation_range[0]), int(100 * (perturber_separation_range[1] + perturber_separation_range[2])), int(100 * perturber_separation_range[2])))) / 100
 BBH_separation_range = np.array(list(range(int(100 * BBH_separation_range[0]), int(100 * (BBH_separation_range[1] + BBH_separation_range[2])), int(100 * BBH_separation_range[2])))) / 100
@@ -60,7 +60,7 @@ for BBH_separation in BBH_separation_range:
         pairs.append((float(pair[0]), float(pair[1])))
 
         directory = os.path.join(run_dir, f"BBH_separation_{BBH_separation}", f"perturber_separation_{perturber_separation}")
-        run_numbers = np.arange(1, 101, 1)
+        run_numbers = np.arange(1, 11, 1)
 
         bound_outcomes = []
         t_GWs = []

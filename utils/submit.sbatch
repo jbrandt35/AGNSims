@@ -10,4 +10,3 @@ cd WORKDIR
 module load anaconda3/2022.05
 conda activate /storage/home/hhive1/jbrandt35/.conda/envs/rebound_gr
 srun python Simulation.py
-rm *.py

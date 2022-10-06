@@ -1,13 +1,13 @@
 from Tools import *
+from math import pi
 
-perturber_a = PERTSEPARATION
-binary_separation = BINSEPARATION
-
+perturber_a = 2.0
+binary_separation = 0.1
 
 #####################################################################################
 
 sim = create_simulation()
-w = populate_simulation(sim, perturber_a = perturber_a, binary_separation = binary_separation, randomize_M = True)
+w = populate_simulation(sim, perturber_a = perturber_a, binary_separation = binary_separation, binary_inc = pi, randomize_M = True)
 
 binary_period, SMBH_period, perturber_period = get_binary_period(sim), get_binary_SMBH_period(sim), get_perturber_period(sim)
 sim.dt = 0.05 * binary_period
