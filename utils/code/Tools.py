@@ -42,8 +42,6 @@ def get_binary_COM_data(m_SMBH, m_binary, a, e = 0, M = 0, inc = 0):
     #Get its Hill Radius
     R_hill = virtual_sim.particles["binary_COM"].rhill
 
-    print(R_hill)
-
     return position, velocity, R_hill
 
 
@@ -137,6 +135,8 @@ def get_binary_period(sim):
     orbit = sim.particles["BBH_1"].calculate_orbit(primary = sim.particles["BBH_2"])
     return orbit.P
 
+def normalize(vector):
+    return np.array(vector)/mag(vector)
 
 def get_binary_SMBH_period(sim):
     binary_barycenter = sim.calculate_com(first = 1, last = 3)
