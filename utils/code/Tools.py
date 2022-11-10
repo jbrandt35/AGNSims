@@ -77,7 +77,7 @@ def get_BBH_data(m1, m2, a, e = 0, M = 0, inc = 0):
 #SMBH_a in units of Gravitational Radii, binary_separation in units of m1 Hill radii, perturber_a in units of m1+m2 Hill radii
 #Returns w - for calculating mergers between m1 and m2
 #Each particle is hashed with a name useful for other functions - i.e. see period calculation functions
-def populate_simulation(sim, binary_separation = 0.1, binary_eccentricity = 0, binary_M = 0, binary_inc = 0, SMBH_a = 1000, SMBH_eccentricity = 0, SMBH_M = 0, SMBH_inc = 0, perturber_a = 20, perturber_e = 0, perturber_M = 0, perturber_inc = 0, randomize_M = False):
+def populate_simulation(sim, binary_separation = 0.1, binary_eccentricity = 0, binary_M = 0, binary_inc = 0, SMBH_a = 1000, SMBH_eccentricity = 0, SMBH_M = 0, SMBH_inc = 0, perturber_a = 20, perturber_e = 0, perturber_M = 0, perturber_inc = 0, randomize_M = False, ignore_perturber = False):
 
     #Calculate Gravitational Radius and convert units of SMBH_a
     Rg = sim.G * m0 / c ** 2
@@ -121,8 +121,13 @@ def populate_simulation(sim, binary_separation = 0.1, binary_eccentricity = 0, b
     sim.add(BH_1)
     sim.add(BH_2)
 
-    #Add perturber into sim
-    sim.add(primary = sim.particles["SMBH"], m = m2, a = perturber_a, e = perturber_e, M = perturber_M, inc = perturber_inc, hash = "perturber")
+    if not ignore_perturber:
+        #Add perturber into sim
+        sim.add(primary = sim.particles["SMBH"], m = m2, a = perturber_a, e = perturber_e, M = perturber_M, inc = perturber_inc, hash = "perturber")
+    else:
+        #Add perturber as test particle
+        sim.add(primary=sim.particles["SMBH"], a=perturber_a, e=perturber_e, M=perturber_M, inc=perturber_inc, hash="perturber")
+        sim.N_active = 3
 
     #Move to COM frame of simulation
     sim.move_to_com()
@@ -288,7 +293,7 @@ def save_data_to_buffer(sim):
     binary_COM = sim.calculate_com(first = 1, last = 3)
 
     save_to_frame(buffers["Misc"], [sim.t, sim.dt, sim.particles["BBH_2"].calculate_orbit(primary = sim.particles["BBH_1"]).e, get_perturber_binary_separation(binary_COM, sim.particles["perturber"]), sim.particles["perturber"].calculate_orbit(primary = sim.particles["SMBH"]).a])
-    save_to_frame(buffers["binary"], [binary_COM.x, binary_COM.y, binary_COM.z, t_GW(sim), sim.particles["BBH_1"].calculate_orbit(primary = sim.particles["BBH_2"]).a, binary_COM.vx, binary_COM.vy, binary_COM.vz])
+    save_to_frame(buffers["binary"], [binary_COM.x, binary_COM.y, binary_COM.z, t_GW(sim), sim.particles["BBH_1"].calculate_orbit(primary = sim.particles["BBH_2"]).a, binary_COM.vx, binary_COM.vy, binary_COM.vz, spin[0], spin[1], spin[2], BBH_2_L_hat[0], BBH_2_L_hat[1], BBH_2_L_hat[2]])
 
     for particle in data_objects:
         save_to_frame(buffers[particle], [sim.particles[particle].x, sim.particles[particle].y, sim.particles[particle].z, sim.particles[particle].vx, sim.particles[particle].vy, sim.particles[particle].vz])
@@ -304,7 +309,7 @@ def save_data_to_disk():
 
 def clear_buffer():
     buffers["Misc"] = pd.DataFrame(columns = ["time", "time-step", "binary eccentricity", "perturber-binary separation", "a_perturber"])
-    buffers["binary"] = pd.DataFrame(columns = ["x", "y", "z", "t_GW", "a", "vx", "vy", "vz"])
+    buffers["binary"] = pd.DataFrame(columns = ["x", "y", "z", "t_GW", "a", "vx", "vy", "vz", "S_x", "S_y", "S_z", "L_x", "L_y", "L_z"])
     for particle in data_objects:
         buffers[particle] = pd.DataFrame(columns = ["x", "y", "z", "vx", "vy", "vz"])
 
@@ -319,6 +324,15 @@ def dump_record(record):
     with open("outcome.json", "w") as file:
         json.dump(record, file)
     save_data_to_disk()
+
+def save_spin(sim, spin):
+    obliquity = np.arccos(spin[2])
+    obliquity = np.degrees(obliquity)
+
+    longitude = np.arctan2(spin[0], -spin[1])
+
+    with open("../../spin.dat", "a") as spin_file:
+        spin_file.write(f"{np.round(sim.t, 4)},{np.round(obliquity, 4)},{np.round(longitude, 4)}" + "\n")
 
 
 class UnboundException(Exception):
@@ -336,9 +350,13 @@ outcome_record = {"Result": None, "Minimum Distance Between Binary COM and Pertu
 
 total_time_steps_completed = 0
 
+spin = [0, 0, 1]
+
+BBH_2_L_hat = [0, 0, 1]
+
 buffers = {
     "Misc": pd.DataFrame(columns = ["time", "time-step", "binary eccentricity", "perturber-binary separation", "a_perturber"]),
-    "binary": pd.DataFrame(columns = ["x", "y", "z", "t_GW", "a", "vx", "vy", "vz"])
+    "binary": pd.DataFrame(columns = ["x", "y", "z", "t_GW", "a", "vx", "vy", "vz", "S_x", "S_y", "S_z", "L_x", "L_y", "L_z"])
 }
 for particle in data_objects:
     buffers[particle] = pd.DataFrame(columns = ["x", "y", "z", "vx", "vy", "vz"])

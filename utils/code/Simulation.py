@@ -1,12 +1,13 @@
 from Tools import *
+import numpy as np
 
-perturber_a = 2.0
-binary_separation = 0.1
+perturber_a = PERTSEPARATION
+binary_separation = BINSEPARATION
 
 #####################################################################################
 
 sim = create_simulation()
-w = populate_simulation(sim, perturber_a = perturber_a, binary_separation = binary_separation, randomize_M = True)
+w = populate_simulation(sim, perturber_a = perturber_a, binary_separation = binary_separation, ignore_perturber = True)
 
 binary_period, SMBH_period, perturber_period = get_binary_period(sim), get_binary_SMBH_period(sim), get_perturber_period(sim)
 sim.dt = 0.05 * binary_period
@@ -22,9 +23,16 @@ spin_ode = sim.create_ode(length = 3, needs_nbody = True)
 
 spin_ode.y[0], spin_ode.y[1], spin_ode.y[2] = 0, 0, 1
 
+sim.integrator = "BS"
+
 def spin_ode_update(ode, ds_dt, s_hat, t):
 
     s_hat = np.array([s_hat[0], s_hat[1], s_hat[2]])
+
+    global spin
+    spin[0] = s_hat[0]
+    spin[1] = s_hat[1]
+    spin[2] = s_hat[2]
 
     BBH_1, BBH_2 = sim.particles["BBH_1"], sim.particles["BBH_2"]
 
@@ -34,6 +42,10 @@ def spin_ode_update(ode, ds_dt, s_hat, t):
     v = np.array(BBH_2.vxyz) - np.array(BBH_1.vxyz)
 
     L_hat = normalize(np.cross(r, BBH_2.m * v))
+    global BBH_2_L_hat
+    BBH_2_L_hat[0] = L_hat[0]
+    BBH_2_L_hat[1] = L_hat[1]
+    BBH_2_L_hat[2] = L_hat[2]
 
     n = binary_orbit.n
     G = sim.G
@@ -43,7 +55,9 @@ def spin_ode_update(ode, ds_dt, s_hat, t):
 
     ds_dt_vector = ((3 * G * n * (m2 + mu/3)) / (2 * c**2 * a2)) * np.cross(L_hat, s_hat)
 
-    ds_dt[0], ds_dt[1], ds_dt[2] = ds_dt_vector
+    ds_dt[0] = ds_dt_vector[0]
+    ds_dt[1] = ds_dt_vector[1]
+    ds_dt[2] = ds_dt_vector[2]
 
 
 spin_ode.derivatives = spin_ode_update
