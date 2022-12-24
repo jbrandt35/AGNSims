@@ -132,6 +132,16 @@ def populate_simulation(sim, binary_separation = 0.1, binary_eccentricity = 0, b
     #Move to COM frame of simulation
     sim.move_to_com()
 
+    BBH_1, BBH_2 = sim.particles["BBH_1"], sim.particles["BBH_2"]
+    r = np.array(BBH_2.xyz) - np.array(BBH_1.xyz)
+    v = np.array(BBH_2.vxyz) - np.array(BBH_1.vxyz)
+    L_hat = normalize(np.cross(r, BBH_2.m * v))
+
+    global BBH_2_L_hat
+    BBH_2_L_hat[0] = L_hat[0]
+    BBH_2_L_hat[1] = L_hat[1]
+    BBH_2_L_hat[2] = L_hat[2]
+
     return np.sqrt(sim.G * m0 / SMBH_a) - np.sqrt(sim.G * m0 / perturber_a) + np.sqrt(
         sim.G * (m1_a + m1_b) / (binary_separation ** 3)) * binary_separation * (m1_b/(m1_a+m1_b))
 
@@ -291,9 +301,13 @@ def save_to_frame(df, data):
 
 def save_data_to_buffer(sim):
     binary_COM = sim.calculate_com(first = 1, last = 3)
+    binary_COM_velocity = np.array(binary_COM.vxyz)
+    binary_COM_position = np.array(binary_COM.xyz)
+    binary_COM_L = np.cross(binary_COM_position, binary_COM.m * binary_COM_velocity)
+    binary_COM_L_hat = binary_COM_L / mag(binary_COM_L)
 
     save_to_frame(buffers["Misc"], [sim.t, sim.dt, sim.particles["BBH_2"].calculate_orbit(primary = sim.particles["BBH_1"]).e, get_perturber_binary_separation(binary_COM, sim.particles["perturber"]), sim.particles["perturber"].calculate_orbit(primary = sim.particles["SMBH"]).a])
-    save_to_frame(buffers["binary"], [binary_COM.x, binary_COM.y, binary_COM.z, t_GW(sim), sim.particles["BBH_1"].calculate_orbit(primary = sim.particles["BBH_2"]).a, binary_COM.vx, binary_COM.vy, binary_COM.vz, spin[0], spin[1], spin[2], BBH_2_L_hat[0], BBH_2_L_hat[1], BBH_2_L_hat[2]])
+    save_to_frame(buffers["binary"], [binary_COM.x, binary_COM.y, binary_COM.z, t_GW(sim), sim.particles["BBH_1"].calculate_orbit(primary = sim.particles["BBH_2"]).a, binary_COM.vx, binary_COM.vy, binary_COM.vz, spin[0], spin[1], spin[2], BBH_2_L_hat[0], BBH_2_L_hat[1], BBH_2_L_hat[2], binary_COM_L_hat[0], binary_L_hat[1], binary_COM_L_hat[2]])
 
     for particle in data_objects:
         save_to_frame(buffers[particle], [sim.particles[particle].x, sim.particles[particle].y, sim.particles[particle].z, sim.particles[particle].vx, sim.particles[particle].vy, sim.particles[particle].vz])
@@ -309,7 +323,7 @@ def save_data_to_disk():
 
 def clear_buffer():
     buffers["Misc"] = pd.DataFrame(columns = ["time", "time-step", "binary eccentricity", "perturber-binary separation", "a_perturber"])
-    buffers["binary"] = pd.DataFrame(columns = ["x", "y", "z", "t_GW", "a", "vx", "vy", "vz", "S_x", "S_y", "S_z", "L_x", "L_y", "L_z"])
+    buffers["binary"] = pd.DataFrame(columns = ["x", "y", "z", "t_GW", "a", "vx", "vy", "vz", "S_x", "S_y", "S_z", "L_x_BBH_2", "L_y_BBH2", "L_z_BBH2", "L_x_Binary", "L_y_Binary", "L_z_Binary"])
     for particle in data_objects:
         buffers[particle] = pd.DataFrame(columns = ["x", "y", "z", "vx", "vy", "vz"])
 
@@ -325,15 +339,6 @@ def dump_record(record):
         json.dump(record, file)
     save_data_to_disk()
 
-def save_spin(sim, spin):
-    obliquity = np.arccos(spin[2])
-    obliquity = np.degrees(obliquity)
-
-    longitude = np.arctan2(spin[0], -spin[1])
-
-    with open("../../spin.dat", "a") as spin_file:
-        spin_file.write(f"{np.round(sim.t, 4)},{np.round(obliquity, 4)},{np.round(longitude, 4)}" + "\n")
-
 
 class UnboundException(Exception):
     pass
@@ -345,8 +350,10 @@ class CollisionException(Exception):
 
 #####################################################################################
 
+inclination_of_binary = (np.radians(30) * np.random.rand(1))[0]
+
 outcome_record = {"Result": None, "Minimum Distance Between Binary COM and Perturber": np.inf,
-                  "Minimum Distance Between BBHs": np.inf, "Minimum t_GW": np.inf, "Minimum relative t_GW": np.inf}
+                  "Minimum Distance Between BBHs": np.inf, "Minimum t_GW": np.inf, "Minimum relative t_GW": np.inf, "Initial Inclination of BBH_2 around BBH_1": np.degrees(inclination_of_binary)}
 
 total_time_steps_completed = 0
 
@@ -354,9 +361,11 @@ spin = [0, 0, 1]
 
 BBH_2_L_hat = [0, 0, 1]
 
+binary_L_hat = [0, 0, 1]
+
 buffers = {
     "Misc": pd.DataFrame(columns = ["time", "time-step", "binary eccentricity", "perturber-binary separation", "a_perturber"]),
-    "binary": pd.DataFrame(columns = ["x", "y", "z", "t_GW", "a", "vx", "vy", "vz", "S_x", "S_y", "S_z", "L_x", "L_y", "L_z"])
+    "binary": pd.DataFrame(columns = ["x", "y", "z", "t_GW", "a", "vx", "vy", "vz", "S_x", "S_y", "S_z", "L_x_BBH_2", "L_y_BBH2", "L_z_BBH2", "L_x_Binary", "L_y_Binary", "L_z_Binary"])
 }
 for particle in data_objects:
     buffers[particle] = pd.DataFrame(columns = ["x", "y", "z", "vx", "vy", "vz"])

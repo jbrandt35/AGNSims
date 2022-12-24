@@ -1,13 +1,15 @@
 from Tools import *
 import numpy as np
 
-perturber_a = PERTSEPARATION
-binary_separation = BINSEPARATION
+perturber_a = 3.5
+binary_separation = 0.28
 
 #####################################################################################
 
+global inclination_of_binary
+
 sim = create_simulation()
-w = populate_simulation(sim, perturber_a = perturber_a, binary_separation = binary_separation, ignore_perturber = True)
+w = populate_simulation(sim, perturber_a = perturber_a, binary_separation = binary_separation, ignore_perturber = True, randomize_M = True, binary_inc = np.radians(30))
 
 binary_period, SMBH_period, perturber_period = get_binary_period(sim), get_binary_SMBH_period(sim), get_perturber_period(sim)
 sim.dt = 0.05 * binary_period
@@ -21,7 +23,8 @@ gr_radiation.params["gr_rad_part2"] = 2
 
 spin_ode = sim.create_ode(length = 3, needs_nbody = True)
 
-spin_ode.y[0], spin_ode.y[1], spin_ode.y[2] = 0, 0, 1
+global BBH_2_L_hat
+spin_ode.y[0], spin_ode.y[1], spin_ode.y[2] = BBH_2_L_hat[0], BBH_2_L_hat[1], BBH_2_L_hat[2]
 
 sim.integrator = "BS"
 
@@ -35,23 +38,38 @@ def spin_ode_update(ode, ds_dt, s_hat, t):
     spin[2] = s_hat[2]
 
     BBH_1, BBH_2 = sim.particles["BBH_1"], sim.particles["BBH_2"]
-
-    binary_orbit = BBH_2.calculate_orbit(primary = BBH_1)
-
     r = np.array(BBH_2.xyz) - np.array(BBH_1.xyz)
     v = np.array(BBH_2.vxyz) - np.array(BBH_1.vxyz)
-
     L_hat = normalize(np.cross(r, BBH_2.m * v))
+
     global BBH_2_L_hat
     BBH_2_L_hat[0] = L_hat[0]
     BBH_2_L_hat[1] = L_hat[1]
     BBH_2_L_hat[2] = L_hat[2]
+
+    binary_orbit = BBH_2.calculate_orbit(primary = BBH_1)
 
     n = binary_orbit.n
     G = sim.G
     a2 = binary_orbit.a
     mu = BBH_1.m * BBH_2.m / (BBH_1.m + BBH_2.m)
     m2 = BBH_2.m
+
+    #========================
+
+    n2 = 2*np.pi/get_binary_SMBH_period(sim)
+    m3 = sim.particles["SMBH"].m
+    m1 = BBH_1.m
+    a3 = np.cbrt((G * m3 * get_binary_SMBH_period(sim)**2/(4 * np.pi**2)))
+
+    de_sitter_magnitude = ( 3 * G * n *(m2 + mu/3) ) / (2 * c**2 * a2)
+
+    l_precession_magnitude = ( 3 * n2 * m3 * a2**3) / ( 4*(m1 + m2) * a3**3)
+
+    print(de_sitter_magnitude / l_precession_magnitude)
+
+    #==========================
+
 
     ds_dt_vector = ((3 * G * n * (m2 + mu/3)) / (2 * c**2 * a2)) * np.cross(L_hat, s_hat)
 
