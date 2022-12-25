@@ -6,7 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="38bd1f9c-21cd-4995-a960-13f4deefe81a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/NewAnalysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/NewAnalysis.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/code/Simulation.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/code/Simulation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/code/Tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/code/Tools.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -74,7 +75,7 @@
       <option name="presentableId" value="Default" />
       <updated>1671912408647</updated>
       <workItem from="1671912411176" duration="161000" />
-      <workItem from="1671912578390" duration="8571000" />
+      <workItem from="1671912578390" duration="9820000" />
     </task>
     <task id="LOCAL-00003" summary="Updating Code and Repo">
       <created>1671912465486</created>
@@ -104,7 +105,21 @@
       <option name="project" value="LOCAL" />
       <updated>1671927051287</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="More work on new analysis script">
+      <created>1671997673500</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1671997673500</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Updating names of saved vector components">
+      <created>1671998490255</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1671998490255</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -118,7 +133,9 @@
     <MESSAGE value="Uploading merge cleaner" />
     <MESSAGE value="Updating Analysis File" />
     <MESSAGE value="bug fix" />
-    <option name="LAST_COMMIT_MESSAGE" value="bug fix" />
+    <MESSAGE value="More work on new analysis script" />
+    <MESSAGE value="Updating names of saved vector components" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updating names of saved vector components" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/AGNMergers$OrbitalElementConvert.coverage" NAME="Simulation Coverage Results" MODIFIED="1654800360981" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

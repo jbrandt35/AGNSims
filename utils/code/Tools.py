@@ -77,7 +77,7 @@ def get_BBH_data(m1, m2, a, e = 0, M = 0, inc = 0):
 #SMBH_a in units of Gravitational Radii, binary_separation in units of m1 Hill radii, perturber_a in units of m1+m2 Hill radii
 #Returns w - for calculating mergers between m1 and m2
 #Each particle is hashed with a name useful for other functions - i.e. see period calculation functions
-def populate_simulation(sim, binary_separation = 0.1, binary_eccentricity = 0, binary_M = 0, binary_inc = 0, SMBH_a = 1000, SMBH_eccentricity = 0, SMBH_M = 0, SMBH_inc = 0, perturber_a = 20, perturber_e = 0, perturber_M = 0, perturber_inc = 0, randomize_M = False, ignore_perturber = False):
+def populate_simulation(sim, mode, binary_separation = 0.1, binary_eccentricity = 0, binary_M = 0, binary_inc = 0, SMBH_a = 1000, SMBH_eccentricity = 0, SMBH_M = 0, SMBH_inc = 0, perturber_a = 20, perturber_e = 0, perturber_M = 0, perturber_inc = 0, randomize_M = False, ignore_perturber = False):
 
     #Calculate Gravitational Radius and convert units of SMBH_a
     Rg = sim.G * m0 / c ** 2
@@ -141,6 +141,16 @@ def populate_simulation(sim, binary_separation = 0.1, binary_eccentricity = 0, b
     BBH_2_L_hat[0] = L_hat[0]
     BBH_2_L_hat[1] = L_hat[1]
     BBH_2_L_hat[2] = L_hat[2]
+
+    global spin
+    if mode == "initial_spin_aligned_with_L_of_BBH2":
+        spin[0] = L_hat[0]
+        spin[1] = L_hat[1]
+        spin[2] = L_hat[2]
+    elif mode == "initial_spin_aligned_with_L_of_Binary":
+        spin[0] = 0
+        spin[1] = 0
+        spin[2] = 1
 
     return np.sqrt(sim.G * m0 / SMBH_a) - np.sqrt(sim.G * m0 / perturber_a) + np.sqrt(
         sim.G * (m1_a + m1_b) / (binary_separation ** 3)) * binary_separation * (m1_b/(m1_a+m1_b))
