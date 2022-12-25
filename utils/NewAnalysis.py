@@ -20,14 +20,14 @@ def run_finished(directory):
 def retrieve_data(run_directory, data_name, data_location, source):
     if source == "data_file":
         with pd.HDFStore(os.path.join(run_directory, "result", "data.h5"), complevel = 5, complib = "zlib") as data_file:
-            data = data_file[data_name]
+            data = data_file[data_location][data_name]
     elif source == "outcome_file":
         with open(os.path.join(run_directory, "outcome.json")) as outcome_file:
-            data = json.load(outcome_file)[data_location][data_name]
+            data = json.load(outcome_file)[data_name]
 
     return data
 
-def get_final_values(data_name, data_location, source = "data_file"):
+def get_final_values(data_name, data_location = None, source = "data_file"):
 
     final_values = []
 
