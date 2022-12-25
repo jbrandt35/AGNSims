@@ -323,7 +323,7 @@ def save_data_to_disk():
 
 def clear_buffer():
     buffers["Misc"] = pd.DataFrame(columns = ["time", "time-step", "binary eccentricity", "perturber-binary separation", "a_perturber"])
-    buffers["binary"] = pd.DataFrame(columns = ["x", "y", "z", "t_GW", "a", "vx", "vy", "vz", "S_x", "S_y", "S_z", "L_x_BBH_2", "L_y_BBH2", "L_z_BBH2", "L_x_Binary", "L_y_Binary", "L_z_Binary"])
+    buffers["binary"] = pd.DataFrame(columns = ["x", "y", "z", "t_GW", "a", "vx", "vy", "vz", "S_x", "S_y", "S_z", "L_BBH2_x", "L_BBH2_y", "L_BBH2_z", "L_Binary_x", "L_Binary_y", "L_Binary_z"])
     for particle in data_objects:
         buffers[particle] = pd.DataFrame(columns = ["x", "y", "z", "vx", "vy", "vz"])
 
@@ -365,7 +365,7 @@ binary_L_hat = [0, 0, 1]
 
 buffers = {
     "Misc": pd.DataFrame(columns = ["time", "time-step", "binary eccentricity", "perturber-binary separation", "a_perturber"]),
-    "binary": pd.DataFrame(columns = ["x", "y", "z", "t_GW", "a", "vx", "vy", "vz", "S_x", "S_y", "S_z", "L_x_BBH_2", "L_y_BBH2", "L_z_BBH2", "L_x_Binary", "L_y_Binary", "L_z_Binary"])
+    "binary": pd.DataFrame(columns = ["x", "y", "z", "t_GW", "a", "vx", "vy", "vz", "S_x", "S_y", "S_z", "L_BBH2_x", "L_BBH2_y", "L_BBH2_z", "L_Binary_x", "L_Binary_y", "L_Binary_z"])
 }
 for particle in data_objects:
     buffers[particle] = pd.DataFrame(columns = ["x", "y", "z", "vx", "vy", "vz"])
