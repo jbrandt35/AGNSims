@@ -6,8 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="38bd1f9c-21cd-4995-a960-13f4deefe81a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/code/Simulation.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/code/Simulation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/code/Tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/code/Tools.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/MergeCleaner.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/MergeCleaner.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -75,7 +74,7 @@
       <option name="presentableId" value="Default" />
       <updated>1671912408647</updated>
       <workItem from="1671912411176" duration="161000" />
-      <workItem from="1671912578390" duration="9820000" />
+      <workItem from="1671912578390" duration="10456000" />
     </task>
     <task id="LOCAL-00003" summary="Updating Code and Repo">
       <created>1671912465486</created>
@@ -119,7 +118,14 @@
       <option name="project" value="LOCAL" />
       <updated>1671998490255</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Added catch for saving initial spin based on how its oriented">
+      <created>1671998980580</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1671998980580</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -135,7 +141,8 @@
     <MESSAGE value="bug fix" />
     <MESSAGE value="More work on new analysis script" />
     <MESSAGE value="Updating names of saved vector components" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updating names of saved vector components" />
+    <MESSAGE value="Added catch for saving initial spin based on how its oriented" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added catch for saving initial spin based on how its oriented" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/AGNMergers$OrbitalElementConvert.coverage" NAME="Simulation Coverage Results" MODIFIED="1654800360981" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
