@@ -18,15 +18,15 @@ def run_finished(directory):
     return os.path.exists(os.path.join(directory, "outcome.json"))
 
 def retrieve_data(run_directory, data_name, data_location, source):
-    try:
-        if source == "data_file":
-            with pd.HDFStore(os.path.join(run_directory, "result", "data.h5"), complevel = 5, complib = "zlib") as data_file:
-                data = data_file[data_location][data_name].tolist()
-        elif source == "outcome_file":
+    if source == "data_file":
+        with pd.HDFStore(os.path.join(run_directory, "result", "data.h5"), complevel = 5, complib = "zlib") as data_file:
+            data = data_file[data_location][data_name].tolist()
+    elif source == "outcome_file":
+        try:
             with open(os.path.join(run_directory, "outcome.json")) as outcome_file:
                 data = json.load(outcome_file)[data_name]
-    except FileNotFoundError:
-        return "Data Not Found"
+        except FileNotFoundError:
+            return "Run Not Finished"
 
     return data
 
