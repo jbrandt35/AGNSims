@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="38bd1f9c-21cd-4995-a960-13f4deefe81a" name="Changes" comment="" />
+    <list default="true" id="38bd1f9c-21cd-4995-a960-13f4deefe81a" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/NewAnalysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/NewAnalysis.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -71,7 +74,7 @@
       <option name="presentableId" value="Default" />
       <updated>1671912408647</updated>
       <workItem from="1671912411176" duration="161000" />
-      <workItem from="1671912578390" duration="10811000" />
+      <workItem from="1671912578390" duration="13279000" />
     </task>
     <task id="LOCAL-00003" summary="Updating Code and Repo">
       <created>1671912465486</created>
@@ -129,7 +132,21 @@
       <option name="project" value="LOCAL" />
       <updated>1672078518328</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Making path relative for working dir of slurm job in build.sh">
+      <created>1672078821039</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1672078821039</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Making all binaries have inclination of 30 degrees">
+      <created>1672079095469</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1672079095469</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -147,7 +164,9 @@
     <MESSAGE value="Updating names of saved vector components" />
     <MESSAGE value="Added catch for saving initial spin based on how its oriented" />
     <MESSAGE value="Adding feature for MergeCleaner to regenerate and re-submit a job" />
-    <option name="LAST_COMMIT_MESSAGE" value="Adding feature for MergeCleaner to regenerate and re-submit a job" />
+    <MESSAGE value="Making path relative for working dir of slurm job in build.sh" />
+    <MESSAGE value="Making all binaries have inclination of 30 degrees" />
+    <option name="LAST_COMMIT_MESSAGE" value="Making all binaries have inclination of 30 degrees" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/AGNMergers$OrbitalElementConvert.coverage" NAME="Simulation Coverage Results" MODIFIED="1654800360981" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

@@ -18,18 +18,21 @@ def run_finished(directory):
     return os.path.exists(os.path.join(directory, "outcome.json"))
 
 def retrieve_data(run_directory, data_name, data_location, source):
-    if source == "data_file":
-        with pd.HDFStore(os.path.join(run_directory, "result", "data.h5"), complevel = 5, complib = "zlib") as data_file:
-            data = data_file[data_location][data_name].tolist()
-    elif source == "outcome_file":
-        with open(os.path.join(run_directory, "outcome.json")) as outcome_file:
-            data = json.load(outcome_file)[data_name]
+    try:
+        if source == "data_file":
+            with pd.HDFStore(os.path.join(run_directory, "result", "data.h5"), complevel = 5, complib = "zlib") as data_file:
+                data = data_file[data_location][data_name].tolist()
+        elif source == "outcome_file":
+            with open(os.path.join(run_directory, "outcome.json")) as outcome_file:
+                data = json.load(outcome_file)[data_name]
+    except FileNotFoundError:
+        return "Data Not Found"
 
     return data
 
-def get_ith_values(data_name, i, data_location = None, source = "data_file"):
+def get_data_values(data_name, i, data_location = None, source = "data_file", only_include_finished = True):
 
-    ith_values = []
+    values = []
 
     for BBH_separation in [float(directory.split("_")[-1]) for directory in os.listdir() if "BBH_separation" in directory]:
         if not (BBH_separation_range_to_analyze[0] <= BBH_separation <= BBH_separation_range_to_analyze[1]):
@@ -39,19 +42,24 @@ def get_ith_values(data_name, i, data_location = None, source = "data_file"):
                 continue
             for run_number in os.listdir(os.path.join(f"BBH_separation_{BBH_separation}", f"perturber_separation_{perturber_separation}")):
                 directory = os.path.join(f"BBH_separation_{BBH_separation}", f"perturber_separation_{perturber_separation}", run_number)
-                if not run_finished(directory):
+                if only_include_finished and (not run_finished(directory)):
                     continue
 
                 data = retrieve_data(directory, data_name, data_location, source)
-                ith_value = data[i]
-                ith_values.append(ith_value)
 
-    return np.array(ith_values)
+                if i is not None:
+                    value = data[i]
+                else:
+                    value = data
+
+                values.append(value)
+
+    return np.array(values)
 
 def get_ith_vectors(i, data_name, data_location):
-    x_components = get_ith_values(f"{data_name}_x", i, data_location = data_location)
-    y_components = get_ith_values(f"{data_name}_y", i, data_location = data_location)
-    z_components = get_ith_values(f"{data_name}_z", i, data_location = data_location)
+    x_components = get_data_values(f"{data_name}_x", i, data_location = data_location)
+    y_components = get_data_values(f"{data_name}_y", i, data_location = data_location)
+    z_components = get_data_values(f"{data_name}_z", i, data_location = data_location)
     vectors = np.stack([x_components, y_components, z_components], axis = 1)
     return vectors
 
@@ -86,6 +94,26 @@ def create_histogram(*data, **hist_kwargs):
     plt.legend()
     plt.savefig(f"../plots/{hist_kwargs['title']}.jpg", bbox_inches = "tight")
     plt.close()
+
+def generate_outcome_piechart():
+
+    outcomes = get_data_values("Result", None, source = "outcome_file", only_include_finished = False)
+
+    aggregate_outcome_data = {}
+    for outcome in outcomes:
+        if ":" in outcome:
+            outcome = outcome.split(":")[0]
+        if outcome not in list(aggregate_outcome_data.keys()):
+            aggregate_outcome_data[outcome] = 1
+        else:
+            aggregate_outcome_data[outcome] += 1
+
+    plt.pie(list(aggregate_outcome_data.values()), labels = list(aggregate_outcome_data.keys()), normalize = True, autopct = "%.2f%%")
+    plt.title("Distribution of Simulation Outcomes")
+    plt.savefig("../plots/outcome_piechart.jpg", bbox_inches = "tight")
+    plt.close()
+
+generate_outcome_piechart()
 
 
 #create_histogram(get_final_values("x", data_location = "Positions/binary"), get_final_values("y", data_location = "Positions/binary"), title = "Title", x_label = "x", y_label = "y")
