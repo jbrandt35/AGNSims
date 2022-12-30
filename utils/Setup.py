@@ -43,20 +43,22 @@ def print_to_stdout(text):
     sys.stdout.write("\n" + text)
 
 
-queue = build_queue(BBH_separation_range, perturber_separation_range)
+if __name__ == '__main__':
 
-while len(queue) > 0:
-    print_to_stdout(f"There are {len(queue)} jobs in the queue")
-    number_of_jobs_submittable = 500 - return_bash("running_jobs.sh")
-    print_to_stdout(f"There are {number_of_jobs_submittable} slots to submit \n")
-    for i in range(0, number_of_jobs_submittable):
-        try:
-            job = queue.pop()
-            run_bash("build.sh", job)
-        except IndexError:
-            print_to_stdout("The queue is finished!")
-            break
-    sleep(60)
+    queue = build_queue(BBH_separation_range, perturber_separation_range)
+
+    while len(queue) > 0:
+        print_to_stdout(f"There are {len(queue)} jobs in the queue")
+        number_of_jobs_submittable = 500 - return_bash("running_jobs.sh")
+        print_to_stdout(f"There are {number_of_jobs_submittable} slots to submit \n")
+        for i in range(0, number_of_jobs_submittable):
+            try:
+                job = queue.pop()
+                run_bash("build.sh", job)
+            except IndexError:
+                print_to_stdout("The queue is finished!")
+                break
+        sleep(60)
 
 
 

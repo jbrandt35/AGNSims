@@ -1,6 +1,6 @@
 import os
 import json
-from Setup import run_bash
+from Setup import run_bash, return_bash
 
 os.chdir("../runs/")
 
@@ -14,14 +14,25 @@ for BBH_separation_dir in [directory for directory in os.listdir() if "BBH_separ
                 json.load(open(os.path.join(BBH_separation_dir, perturber_separation_dir, run_number, "outcome.json")))[
                     "Result"]
             except FileNotFoundError:
-                outcome = "Didn't Finish"
+                continue
 
-            if "Collision Encountered" not in outcome:
+            if return_bash("running_jobs.sh", path = "../utils") < 500:
+                if "Collision Encountered" not in outcome:
 
-                os.system(f"rm -r {BBH_separation_dir}/{perturber_separation_dir}/{run_number}/*")
+                    os.system(f"rm -r {BBH_separation_dir}/{perturber_separation_dir}/{run_number}/*")
 
-                BBH_separation = float(BBH_separation_dir.split("_")[-1])
-                perturber_separation = float(perturber_separation_dir.split("_")[-1])
+                    BBH_separation = float(BBH_separation_dir.split("_")[-1])
+                    perturber_separation = float(perturber_separation_dir.split("_")[-1])
 
-                job = f"{BBH_separation} {perturber_separation} {run_number}"
-                run_bash("build.sh", job)
+                    job = f"{BBH_separation} {perturber_separation} {run_number}"
+                    run_bash("build.sh", job, path = "../utils")
+            else:
+                print("Queue is Full. Stopping...")
+                break
+        else:
+            continue
+        break
+
+    else:
+        continue
+    break

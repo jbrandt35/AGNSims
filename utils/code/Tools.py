@@ -360,7 +360,7 @@ class CollisionException(Exception):
 
 #####################################################################################
 
-inclination_of_binary = np.radians(30)
+inclination_of_binary = np.radians(3)
 
 outcome_record = {"Result": None, "Minimum Distance Between Binary COM and Perturber": np.inf,
                   "Minimum Distance Between BBHs": np.inf, "Minimum t_GW": np.inf, "Minimum relative t_GW": np.inf, "Initial Inclination of BBH_2 around BBH_1": np.degrees(inclination_of_binary)}

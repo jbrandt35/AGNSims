@@ -1,17 +1,17 @@
 from Tools import *
 import numpy as np
 
-perturber_a = 3.5
-binary_separation = 0.28
+perturber_a = PERTSEPARATION
+binary_separation = BINSEPARATION
 
-mode = "initial_spin_aligned_with_L_of_BBH2"
+mode = "initial_spin_aligned_with_L_of_Binary"
 
 #####################################################################################
 
 global inclination_of_binary
 
 sim = create_simulation()
-w = populate_simulation(sim, mode, perturber_a = perturber_a, binary_separation = binary_separation, ignore_perturber = True, randomize_M = True, binary_inc = inclination_of_binary)
+w = populate_simulation(sim, mode, perturber_a = perturber_a, binary_separation = binary_separation, ignore_perturber = False, randomize_M = True, binary_inc = inclination_of_binary)
 
 binary_period, SMBH_period, perturber_period = get_binary_period(sim), get_binary_SMBH_period(sim), get_perturber_period(sim)
 sim.dt = 0.05 * binary_period
