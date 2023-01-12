@@ -6,6 +6,15 @@ binary_separation = BINSEPARATION
 
 mode = "initial_spin_aligned_with_L_of_Binary"
 
+include_drag_force = False
+tau_drag = 5e6
+
+include_trap_force = False
+tau_trap = 5e5
+
+include_rebound_migration = True
+tau_mig = 1e5
+
 #####################################################################################
 
 global inclination_of_binary
@@ -32,6 +41,29 @@ elif mode == "initial_spin_aligned_with_L_of_Binary":
     spin_ode.y[0], spin_ode.y[1], spin_ode.y[2] = 0, 0, 1
 
 sim.integrator = "BS"
+
+def dragForce(reb_sim, rebx_force, particles, N):
+    sim = reb_sim.contents
+    dragforce = rebx_force.contents
+    vxyz = particles[3].vxyz
+    r_0 = particles[0].xyz
+    r_pert = particles[3].xyz
+    tau_drag = dragforce.params["c"]
+    ax, ay, az = calc_drag_force(tau_drag*SMBH_period, vxyz, sim.G, particles[0].m, r_0, r_pert)
+    particles[3].ax += ax
+    particles[3].ay += ay
+    particles[3].az += az
+
+def trapForce(reb_sim, rebx_force, particles, N):
+    sim = reb_sim.contents
+    trapforce = rebx_force.contents
+    r_SMBH = particles[0].xyz
+    r_pert = particles[3].xyz
+    tau_trap = trapforce.params["c"]
+    ax, ay, az = calc_trap_force(tau_trap*SMBH_period, sim.G, particles[0].m, SMBH_a, r_pert, r_SMBH)
+    particles[3].ax += ax
+    particles[3].ay += ay
+    particles[3].az += az
 
 def spin_ode_update(ode, ds_dt, s_hat, t):
 
@@ -60,21 +92,6 @@ def spin_ode_update(ode, ds_dt, s_hat, t):
     mu = BBH_1.m * BBH_2.m / (BBH_1.m + BBH_2.m)
     m2 = BBH_2.m
 
-    #========================
-
-    # n2 = 2*np.pi/get_binary_SMBH_period(sim)
-    # m3 = sim.particles["SMBH"].m
-    # m1 = BBH_1.m
-    # a3 = np.cbrt((G * m3 * get_binary_SMBH_period(sim)**2/(4 * np.pi**2)))
-    #
-    # de_sitter_magnitude = ( 3 * G * n *(m2 + mu/3) ) / (2 * c**2 * a2)
-    #
-    # l_precession_magnitude = ( 3 * n2 * m3 * a2**3) / ( 4*(m1 + m2) * a3**3)
-    #
-    # print(de_sitter_magnitude / l_precession_magnitude)
-
-    #==========================
-
 
     ds_dt_vector = ((3 * G * n * (m2 + mu/3)) / (2 * c**2 * a2)) * np.cross(L_hat, s_hat)
 
@@ -84,6 +101,25 @@ def spin_ode_update(ode, ds_dt, s_hat, t):
 
 
 spin_ode.derivatives = spin_ode_update
+
+if include_drag_force:
+    myforce = rebx.create_force("drag")
+    myforce.force_type = "vel"
+    myforce.update_accelerations = dragForce
+    rebx.add_force(myforce)
+    myforce.params["c"] = tau_drag
+
+if include_trap_force:
+    myforce = rebx.create_force("trap")
+    myforce.force_type = "vel"
+    myforce.update_accelerations = trapForce
+    rebx.add_force(myforce)
+    myforce.params["c"] = tau_trap
+
+if include_rebound_migration:
+    mig = rebx.load_force("modify_orbits_forces")
+    rebx.add_force(mig)
+    sim.particles['perturber'].params['tau_a'] = -tau_mig
 
 
 initialize_data_collection()

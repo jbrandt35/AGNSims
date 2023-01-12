@@ -20,6 +20,27 @@ def create_simulation():
     sim.units = ["Msun", "yr", "AU"]
     return sim
 
+def calc_drag_force(tau, vxyz, G, M, r_0, r_pert):
+    vx, vy, vz = vxyz
+    r = [r_pert[0] - r_0[0], r_pert[1] - r_0[1], r_pert[2] - r_0[2]]
+    x, y, z = r
+    d = np.sqrt(x**2 + y**2 + z**2)
+    beta = np.sqrt(G*M/(d**5))
+    ax = (-1/tau)*(vx + y*beta)
+    ay = (-1/tau)*(vy - x*beta)
+    az = (-1/tau)*(vz)
+    return ax, ay, az
+def calc_trap_force(tau, G, M, a_bin, r_pert, r_SMBH):
+    omega = np.sqrt(G*M/(a_bin**3))
+    r = [r_pert[0] - r_SMBH[0], r_pert[1] - r_SMBH[1], r_pert[2] - r_SMBH[2]]
+    x, y, z = r
+    d = np.sqrt(x**2 + y**2 + z**2)
+    F_mag = -omega(d - a_bin)/tau
+    ax = F_mag*(-y/d)
+    ay = F_mag*(x/d)
+    az = 0
+    return ax, ay, az
+
 
 # Returns the velocity of the COM of the binary given its orbital elements. Note: SMBH needs to be in sim.particles
 def get_binary_COM_data(m_SMBH, m_binary, a, e = 0, M = 0, inc = 0):

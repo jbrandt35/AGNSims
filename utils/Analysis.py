@@ -34,7 +34,6 @@ def run_ended_in_merger(directory):
     return "Collision Encountered" in retrieve_data(directory, "Result", None, "outcome_file")
 
 def get_data_values(data_name, i, data_location = None, source = "data_file", only_include_finished = True, only_include_merged = False):
-
     values = []
 
     for BBH_separation in [float(directory.split("_")[-1]) for directory in os.listdir() if "BBH_separation" in directory]:
@@ -45,7 +44,9 @@ def get_data_values(data_name, i, data_location = None, source = "data_file", on
                 continue
             for run_number in os.listdir(os.path.join(f"BBH_separation_{BBH_separation}", f"perturber_separation_{perturber_separation}")):
                 directory = os.path.join(f"BBH_separation_{BBH_separation}", f"perturber_separation_{perturber_separation}", run_number)
-                if (only_include_finished and (not run_finished(directory))) or (only_include_merged and (not run_ended_in_merger(directory))):
+                if only_include_finished and (not run_finished(directory)):
+                    continue
+                if only_include_merged and ((not run_ended_in_merger(directory)) or (not run_finished(directory))):
                     continue
 
                 data = retrieve_data(directory, data_name, data_location, source)
@@ -78,6 +79,7 @@ def get_ith_inclinations(i, data_name_1, data_location_1, data_name_2, data_loca
     for j in range(len(vectors_1)):
         v_1 = np.array(vectors_1[j])
         v_2 = np.array(vectors_2[j])
+
         inclination = get_inclination(v_1, v_2)
         inclinations.append(inclination)
 
@@ -85,7 +87,6 @@ def get_ith_inclinations(i, data_name_1, data_location_1, data_name_2, data_loca
 
 def create_bar_labels(data, bars):
     labels = []
-    print(data)
     for bar in bars:
         bar_height, bar_width = bar.get_height(), bar.get_width()
         if bar_height == 0:
@@ -123,14 +124,15 @@ def generate_outcome_piechart():
             aggregate_outcome_data[outcome] += 1
 
     plt.pie(list(aggregate_outcome_data.values()), labels = list(aggregate_outcome_data.keys()), normalize = True, autopct = "%.2f%%")
-    plt.title("Distribution of Simulation Outcomes")
+    plt.title(f"Distribution of Simulation Outcomes (N = {len(outcomes)})")
     plt.savefig("../plots/outcome_piechart.jpg", bbox_inches = "tight")
     plt.close()
 
 generate_outcome_piechart()
 
 create_histogram(get_ith_inclinations(-1, "S", "Positions/binary", "L_Binary", "Positions/binary"), title = "Final Inclination of Spin to Binary-SMBH L", x_label = "Inclination [deg]", y_label = "Distribution")
-
+create_histogram(get_ith_inclinations(-1, "S", "Positions/binary", "L_BBH2", "Positions/binary"), title = "Final Inclination of Spin to $m1_b$-$m1_a$ L", x_label = "Inclination [deg]", y_label = "Distribution")
+create_histogram(get_ith_inclinations(-1, "L_Binary", "Positions/binary", "L_BBH2", "Positions/binary"), title = "Final Inclination of Binary-SMBH L to $m1_b$-$m1_a$ L", x_label = "Inclination [deg]", y_label = "Distribution")
 
 
 
