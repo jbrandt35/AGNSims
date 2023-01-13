@@ -30,12 +30,13 @@ def calc_drag_force(tau, vxyz, G, M, r_0, r_pert):
     ay = (-1/tau)*(vy - x*beta)
     az = (-1/tau)*(vz)
     return ax, ay, az
+
 def calc_trap_force(tau, G, M, a_bin, r_pert, r_SMBH):
     omega = np.sqrt(G*M/(a_bin**3))
     r = [r_pert[0] - r_SMBH[0], r_pert[1] - r_SMBH[1], r_pert[2] - r_SMBH[2]]
     x, y, z = r
     d = np.sqrt(x**2 + y**2 + z**2)
-    F_mag = -omega(d - a_bin)/tau
+    F_mag = -omega*(d - a_bin)/tau
     ax = F_mag*(-y/d)
     ay = F_mag*(x/d)
     az = 0

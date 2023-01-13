@@ -9,10 +9,10 @@ mode = "initial_spin_aligned_with_L_of_Binary"
 include_drag_force = False
 tau_drag = 5e6
 
-include_trap_force = False
+include_trap_force = True
 tau_trap = 5e5
 
-include_rebound_migration = True
+include_rebound_migration = False
 tau_mig = 1e5
 
 #####################################################################################
@@ -60,7 +60,7 @@ def trapForce(reb_sim, rebx_force, particles, N):
     r_SMBH = particles[0].xyz
     r_pert = particles[3].xyz
     tau_trap = trapforce.params["c"]
-    ax, ay, az = calc_trap_force(tau_trap*SMBH_period, sim.G, particles[0].m, SMBH_a, r_pert, r_SMBH)
+    ax, ay, az = calc_trap_force(tau_trap*SMBH_period, sim.G, particles[0].m, 1000*(sim.G * m0 / c ** 2), r_pert, r_SMBH)
     particles[3].ax += ax
     particles[3].ay += ay
     particles[3].az += az

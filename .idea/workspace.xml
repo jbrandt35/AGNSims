@@ -6,10 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="38bd1f9c-21cd-4995-a960-13f4deefe81a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/Analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/Analysis.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/MergeCleaner.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/MergeCleaner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/OldAnalysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/Depricated_Analysis.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/code/Simulation.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/code/Simulation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/code/Tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/code/Tools.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -108,7 +106,7 @@
       <workItem from="1673285708335" duration="48000" />
       <workItem from="1673396753919" duration="2537000" />
       <workItem from="1673469616584" duration="11000" />
-      <workItem from="1673563239992" duration="657000" />
+      <workItem from="1673563239992" duration="4128000" />
     </task>
     <task id="LOCAL-00003" summary="Updating Code and Repo">
       <created>1671912465486</created>
@@ -208,7 +206,14 @@
       <option name="project" value="LOCAL" />
       <updated>1672513846103</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Implemented Christian's Migration Forces">
+      <created>1673564023117</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1673564023117</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -235,7 +240,8 @@
     <MESSAGE value="update" />
     <MESSAGE value="updates based on run-trials" />
     <MESSAGE value="Updates" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updates" />
+    <MESSAGE value="Implemented Christian's Migration Forces" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implemented Christian's Migration Forces" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/AGNMergers$OrbitalElementConvert.coverage" NAME="Simulation Coverage Results" MODIFIED="1654800360981" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
