@@ -1,6 +1,8 @@
 from Tools import *
 import numpy as np
 
+############################   Settings    ###########################################
+
 perturber_a = PERTSEPARATION
 binary_separation = BINSEPARATION
 
@@ -15,7 +17,7 @@ tau_trap = 5e5
 include_rebound_migration = False
 tau_mig = 1e5
 
-#####################################################################################
+##############################    Initializing   #####################################
 
 global inclination_of_binary
 
@@ -39,6 +41,8 @@ gr_full = rebx.load_force("gr_full")
 rebx.add_force(gr_full)
 gr_full.params["c"] = c
 
+##############################    Tracking Spin   #####################################
+
 spin_ode = sim.create_ode(length = 3, needs_nbody = True)
 
 global BBH_2_L_hat
@@ -48,29 +52,6 @@ elif mode == "initial_spin_aligned_with_L_of_Binary":
     spin_ode.y[0], spin_ode.y[1], spin_ode.y[2] = 0, 0, 1
 
 sim.integrator = "BS"
-
-def dragForce(reb_sim, rebx_force, particles, N):
-    sim = reb_sim.contents
-    dragforce = rebx_force.contents
-    vxyz = particles[3].vxyz
-    r_0 = particles[0].xyz
-    r_pert = particles[3].xyz
-    tau_drag = dragforce.params["c"]
-    ax, ay, az = calc_drag_force(tau_drag*SMBH_period, vxyz, sim.G, particles[0].m, r_0, r_pert)
-    particles[3].ax += ax
-    particles[3].ay += ay
-    particles[3].az += az
-
-def trapForce(reb_sim, rebx_force, particles, N):
-    sim = reb_sim.contents
-    trapforce = rebx_force.contents
-    r_SMBH = particles[0].xyz
-    r_pert = particles[3].xyz
-    tau_trap = trapforce.params["c"]
-    ax, ay, az = calc_trap_force(tau_trap*SMBH_period, sim.G, particles[0].m, 1000*(sim.G * m0 / c ** 2), r_pert, r_SMBH)
-    particles[3].ax += ax
-    particles[3].ay += ay
-    particles[3].az += az
 
 def spin_ode_update(ode, ds_dt, s_hat, t):
 
@@ -108,6 +89,32 @@ def spin_ode_update(ode, ds_dt, s_hat, t):
 
 spin_ode.derivatives = spin_ode_update
 
+
+##############################   Drag Effects   #####################################
+
+def dragForce(reb_sim, rebx_force, particles, N):
+    sim = reb_sim.contents
+    dragforce = rebx_force.contents
+    vxyz = particles[3].vxyz
+    r_0 = particles[0].xyz
+    r_pert = particles[3].xyz
+    tau_drag = dragforce.params["c"]
+    ax, ay, az = calc_drag_force(tau_drag*SMBH_period, vxyz, sim.G, particles[0].m, r_0, r_pert)
+    particles[3].ax += ax
+    particles[3].ay += ay
+    particles[3].az += az
+
+def trapForce(reb_sim, rebx_force, particles, N):
+    sim = reb_sim.contents
+    trapforce = rebx_force.contents
+    r_SMBH = particles[0].xyz
+    r_pert = particles[3].xyz
+    tau_trap = trapforce.params["c"]
+    ax, ay, az = calc_trap_force(tau_trap*SMBH_period, sim.G, particles[0].m, 1000*(sim.G * m0 / c ** 2), r_pert, r_SMBH)
+    particles[3].ax += ax
+    particles[3].ay += ay
+    particles[3].az += az
+
 if include_drag_force:
     myforce = rebx.create_force("drag")
     myforce.force_type = "vel"
@@ -127,9 +134,9 @@ if include_rebound_migration:
     rebx.add_force(mig)
     sim.particles['perturber'].params['tau_a'] = -tau_mig
 
+#####################################################################################
 
 initialize_data_collection()
-#####################################################################################
 
 while sim.t <= 10**5 * SMBH_period:
 
