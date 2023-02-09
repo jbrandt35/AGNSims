@@ -6,10 +6,10 @@ binary_separation = BINSEPARATION
 
 mode = "initial_spin_aligned_with_L_of_Binary"
 
-include_drag_force = False
+include_drag_force = True
 tau_drag = 5e6
 
-include_trap_force = True
+include_trap_force = False
 tau_trap = 5e5
 
 include_rebound_migration = False
@@ -26,11 +26,18 @@ binary_period, SMBH_period, perturber_period = get_binary_period(sim), get_binar
 sim.dt = 0.05 * binary_period
 
 rebx = reboundx.Extras(sim)
+
+#2.5 PN
 gr_radiation = rebx.load_force("gr_radiation")
 rebx.add_force(gr_radiation)
 gr_radiation.params["c"] = c
 gr_radiation.params["gr_rad_part1"] = 1
 gr_radiation.params["gr_rad_part2"] = 2
+
+#1 PN
+gr_full = rebx.load_force("gr_full")
+rebx.add_force(gr_full)
+gr_full.params["c"] = c
 
 spin_ode = sim.create_ode(length = 3, needs_nbody = True)
 
