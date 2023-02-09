@@ -222,6 +222,23 @@ def t_GW(sim):
     t_gw = np.abs(a/da_dt)
     return t_gw
 
+def system_ejected(primary, secondary, limit):
+    d = dist_between(primary, secondary)
+    return bool(d > limit)
+
+def save_final_data(outcome_record, sim):
+
+    outcome_record["Final t_GW"] = t_GW(sim)
+    outcome_record["Final Binary Eccentricity"] = sim.particles['BBH_2'].calculate_orbit(primary=sim.particles['BBH_1']).e
+    outcome_record["Final Binary Semimaj"] = sim.particles['BBH_2'].calculate_orbit(primary=sim.particles['BBH_1']).a
+    outcome_record["Final SMBH xyz"] = sim.particles['SMBH'].xyz
+    outcome_record["Final SMBH vxyz"] = sim.particles['SMBH'].vxyz
+    outcome_record["Final BBH_1 xyz"] = sim.particles['BBH_1'].xyz
+    outcome_record["Final BBH_1 vxyz"] = sim.particles['BBH_1'].vxyz
+    outcome_record["Final BBH_2 xyz"] = sim.particles['BBH_2'].xyz
+    outcome_record["Final BBH_2 vxyz"] = sim.particles['BBH_2'].vxyz
+    outcome_record["Final Perturber xyz"] = sim.particles['perturber'].xyz
+    outcome_record["Final Perturber vxyz"] = sim.particles['perturber'].vxyz
 
 def check_for_collisions(sim, w, record):
 
@@ -231,19 +248,23 @@ def check_for_collisions(sim, w, record):
     BH_b = sim.particles["BBH_2"]
 
     sum_of_event_horizons = 2 * sim.G * (BH_a.m + BH_b.m) / (c ** 2)
-    t_gw = t_GW(sim)
 
     orbit = BH_a.calculate_orbit(primary = BH_b)
     distance, period = orbit.d, orbit.P
 
     if distance < sum_of_event_horizons:
         record["Result"] = f"Collision Encountered: The distance between m1_a and m1_b was {distance} AU when the sum of event horizon radii was {sum_of_event_horizons} AU."
+        save_final_data(record, sim)
         dump_record(record)
         raise CollisionException(record["Result"])
-    elif t_gw < period:
-        record["Result"] = f"Collision Encountered: t_GW was {t_gw} when the period was {period}."
-        dump_record(record)
-        raise CollisionException(record["Result"])
+
+    elif orbit.e < 1:
+        t_gw = t_GW(sim)
+        if t_gw < period:
+            record["Result"] = f"Collision Encountered: t_GW was {t_gw} when the period was {period}."
+            save_final_data(record, sim)
+            dump_record(record)
+            raise CollisionException(record["Result"])
 
     ##############Check Perturber Orbits###############
 
@@ -271,11 +292,45 @@ def check_for_collisions(sim, w, record):
         dump_record(record)
         raise CollisionException(record["Result"])
 
+def check_bound(sim, record):
 
-def check_binary_bound(sim, record):
-    if not is_bound(sim.particles["BBH_1"], sim.particles["BBH_2"]):
-        record["Result"] = f"Unbound: Binary eccentricity reached {sim.particles['BBH_2'].calculate_orbit(primary = sim.particles['BBH_1']).e}"
-        dump_record(record)
+    Rg = sim.G * m0 / c ** 2
+    SMBH_a = 1000 * Rg
+    limit = 10 * SMBH_a
+
+    SMBH, BBH_1, BBH_2, perturber = sim.particles
+
+    if system_ejected(SMBH, BBH_1, limit):
+        if is_bound(BBH_2, perturber):
+            record["Result"] = f"Ejected: BBH_1 left the system and was replaced by perturber in binary, BBH_2 + pertuber ecc: {BBH_2.calculate_orbit(primary = perturber).e}"
+            save_final_data(record, sim)
+            dump_record(record)
+        else:
+            record["Result"] = f"Ejected: BBH_1 left the system without replacement, BBH_2 + pertuber ecc: {BBH_2.calculate_orbit(primary = perturber).e}"
+            save_final_data(record, sim)
+            dump_record(record)
+        raise UnboundException(record["Result"])
+
+    if system_ejected(SMBH, BBH_2, limit):
+        if is_bound(BBH_1, perturber):
+            record["Result"] = f"Ejected: BBH_2 left the system and was replaced by perturber in binary, BBH_1 + pertuber ecc: {BBH_1.calculate_orbit(primary = perturber).e}"
+            save_final_data(record, sim)
+            dump_record(record)
+        else:
+            record["Result"] = f"Ejected: BBH_2 left the system without replacement, BBH_1 + pertuber ecc: {BBH_1.calculate_orbit(primary = perturber).e}"
+            dump_record(record)
+            save_final_data(record, sim)
+        raise UnboundException(record["Result"])
+
+    if system_ejected(SMBH, perturber, limit):
+        if is_bound(BBH_1, BBH_2):
+            record["Result"] = f"Ejected: perturber left the system and binary remained intact, binary ecc: {BBH_2.calculate_orbit(primary = BBH_1).e}"
+            save_final_data(record, sim)
+            dump_record(record)
+        else:
+            record["Result"] = f"Ejected: perturber left the system and binary was separated, binary ecc: {BBH_2.calculate_orbit(primary = BBH_1).e}"
+            save_final_data(record, sim)
+            dump_record(record)
         raise UnboundException(record["Result"])
 
 

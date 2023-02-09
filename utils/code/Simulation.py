@@ -99,7 +99,6 @@ def spin_ode_update(ode, ds_dt, s_hat, t):
     mu = BBH_1.m * BBH_2.m / (BBH_1.m + BBH_2.m)
     m2 = BBH_2.m
 
-
     ds_dt_vector = ((3 * G * n * (m2 + mu/3)) / (2 * c**2 * a2)) * np.cross(L_hat, s_hat)
 
     ds_dt[0] = ds_dt_vector[0]
@@ -140,7 +139,7 @@ while sim.t <= 10**5 * SMBH_period:
     if total_time_steps_completed % 100 == 0:
         save_data(sim)
 
-    check_binary_bound(sim, outcome_record)
+    check_bound(sim, outcome_record)
     check_for_collisions(sim, w, outcome_record)
 
     total_time_steps_completed += 1
@@ -148,7 +147,12 @@ while sim.t <= 10**5 * SMBH_period:
 
 #####################################################################################
 
-outcome_record["Result"] = "Ended with no mergers and bound binary"
+if is_bound(sim.particles[1], sim.particles[2]):
+    outcome_record["Result"] = "Ended with no mergers, bound binary, and all particles within limit to SMBH"
+else:
+    outcome_record["Result"] = "Ended with no mergers, unbound binary, and all particles within limit to SMBH"
+
+save_final_data(outcome_record, sim)
 dump_record(outcome_record)
 
 
