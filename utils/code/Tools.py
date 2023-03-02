@@ -43,6 +43,17 @@ def calc_trap_force(tau, G, M, a_bin, r_pert, r_SMBH):
     return ax, ay, az
 
 
+#Secunda Distributions for Orbital Elements
+def sample_inclination_distribution():
+    inc = np.random.normal(loc = 0, scale = np.radians(0.05))
+    return np.abs(inc)
+
+def sample_eccentricity_distribution():
+    while True:
+        e = np.random.normal(loc = 0.05, scale = 0.02)
+        if e > 0:
+            return e
+
 # Returns the velocity of the COM of the binary given its orbital elements. Note: SMBH needs to be in sim.particles
 def get_binary_COM_data(m_SMBH, m_binary, a, e = 0, M = 0, inc = 0):
 
@@ -220,7 +231,11 @@ def t_GW(sim):
     da_dt = first_term * second_term * third_term
 
     t_gw = np.abs(a/da_dt)
-    return t_gw
+
+    if e < 1:
+        return t_gw
+    else:
+        return -1
 
 def system_ejected(primary, secondary, limit):
     d = dist_between(primary, secondary)
@@ -258,13 +273,14 @@ def check_for_collisions(sim, w, record):
         dump_record(record)
         raise CollisionException(record["Result"])
 
-    elif orbit.e < 1:
-        t_gw = t_GW(sim)
-        if t_gw < period:
-            record["Result"] = f"Collision Encountered: t_GW was {t_gw} when the period was {period}."
-            save_final_data(record, sim)
-            dump_record(record)
-            raise CollisionException(record["Result"])
+    #no longer ending the simulation if t_GW < period
+    # elif orbit.e < 1:
+    #     t_gw = t_GW(sim)
+    #     if t_gw < period:
+    #         record["Result"] = f"Collision Encountered: t_GW was {t_gw} when the period was {period}."
+    #         save_final_data(record, sim)
+    #         dump_record(record)
+    #         raise CollisionException(record["Result"])
 
     ##############Check Perturber Orbits###############
 

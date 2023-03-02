@@ -5,8 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="38bd1f9c-21cd-4995-a960-13f4deefe81a" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/gr_radiation.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/Analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/Analysis.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/Setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/Setup.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/code/Simulation.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/code/Simulation.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/code/Tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/code/Tools.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/submit.sbatch" beforeDir="false" afterPath="$PROJECT_DIR$/utils/submit.sbatch" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,7 +75,7 @@
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.settings.ide.settings.new.ui&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;ssh.settings&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -150,6 +155,10 @@
       <workItem from="1675541817481" duration="3931000" />
       <workItem from="1675702392561" duration="210000" />
       <workItem from="1675785033024" duration="1850000" />
+      <workItem from="1675905106018" duration="3118000" />
+      <workItem from="1676482615312" duration="8091000" />
+      <workItem from="1677168043942" duration="115000" />
+      <workItem from="1677775199158" duration="1015000" />
     </task>
     <task id="LOCAL-00003" summary="Updating Code and Repo">
       <created>1671912465486</created>
@@ -270,7 +279,28 @@
       <option name="project" value="LOCAL" />
       <updated>1675903196442</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="updating code to merge with christian">
+      <created>1675904080942</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1675904080942</updated>
+    </task>
+    <task id="LOCAL-00021" summary="cleaning up">
+      <created>1675904366388</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1675904366388</updated>
+    </task>
+    <task id="LOCAL-00022" summary="cleaning up">
+      <created>1675904702264</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1675904702264</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -300,7 +330,9 @@
     <MESSAGE value="Implemented Christian's Migration Forces" />
     <MESSAGE value="Fixing glitch in calculating trap force" />
     <MESSAGE value="cleaning out junk" />
-    <option name="LAST_COMMIT_MESSAGE" value="cleaning out junk" />
+    <MESSAGE value="updating code to merge with christian" />
+    <MESSAGE value="cleaning up" />
+    <option name="LAST_COMMIT_MESSAGE" value="cleaning up" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/AGNMergers$OrbitalElementConvert.coverage" NAME="Simulation Coverage Results" MODIFIED="1654800360981" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

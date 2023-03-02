@@ -11,8 +11,8 @@ mpl.rcParams['figure.dpi'] = 300
 os.system("mkdir -p ../plots")
 os.chdir("../runs/")
 
-BBH_separation_range_to_analyze = (0.1, 0.4)
-perturber_separation_range_to_analyze = (2.5, 3.5)
+perturber_separation_range_to_analyze = (5.0, 5.0)
+BBH_separation_range_to_analyze = (0.3, 0.3)
 
 def run_finished(directory):
     return os.path.exists(os.path.join(directory, "outcome.json"))
