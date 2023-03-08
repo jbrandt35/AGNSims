@@ -1,12 +1,13 @@
 from Tools import *
 import numpy as np
+import config
 
 ############################   Settings    ###########################################
 
-perturber_a = PERTSEPARATION
-binary_separation = BINSEPARATION
+perturber_a = 5
+binary_separation = 0.5
 
-mode = "initial_spin_aligned_with_L_of_Binary"
+config.mode = "initial_spin_aligned_with_L_of_Binary"
 
 include_drag_force = True
 tau_drag = 5e6
@@ -19,10 +20,8 @@ tau_mig = 1e5
 
 ##############################    Initializing   #####################################
 
-global inclination_of_binary
-
 sim = create_simulation()
-w = populate_simulation(sim, mode, perturber_a = perturber_a, binary_separation = binary_separation, ignore_perturber = False, randomize_M = True, binary_inc = inclination_of_binary)
+w = populate_simulation(sim, perturber_a = perturber_a, binary_separation = binary_separation, ignore_perturber = False, randomize_M = True, binary_inc = config.inclination_of_binary)
 
 binary_period, SMBH_period, perturber_period = get_binary_period(sim), get_binary_SMBH_period(sim), get_perturber_period(sim)
 sim.dt = 0.05 * binary_period
@@ -45,34 +44,18 @@ gr_full.params["c"] = c
 
 ##############################    Tracking Spin   #####################################
 
-spin_ode = sim.create_ode(length = 3, needs_nbody = True)
-
-global BBH_2_L_hat
-if mode == "initial_spin_aligned_with_L_of_BBH2":
-    spin_ode.y[0], spin_ode.y[1], spin_ode.y[2] = BBH_2_L_hat[0], BBH_2_L_hat[1], BBH_2_L_hat[2]
-elif mode == "initial_spin_aligned_with_L_of_Binary":
-    spin_ode.y[0], spin_ode.y[1], spin_ode.y[2] = 0, 0, 1
-
 sim.integrator = "BS"
+
+spin_ode = sim.create_ode(length = 3, needs_nbody = True)
+spin_ode.y[0], spin_ode.y[1], spin_ode.y[2] = config.spin.tolist()
 
 def spin_ode_update(ode, ds_dt, s_hat, t):
 
-    s_hat = np.array([s_hat[0], s_hat[1], s_hat[2]])
-
-    global spin
-    spin[0] = s_hat[0]
-    spin[1] = s_hat[1]
-    spin[2] = s_hat[2]
+    unit_spin_vector = np.array([s_hat[0], s_hat[1], s_hat[2]])
+    config.spin = np.copy(unit_spin_vector)
 
     BBH_1, BBH_2 = sim.particles["BBH_1"], sim.particles["BBH_2"]
-    r = np.array(BBH_2.xyz) - np.array(BBH_1.xyz)
-    v = np.array(BBH_2.vxyz) - np.array(BBH_1.vxyz)
-    L_hat = normalize(np.cross(r, BBH_2.m * v))
-
-    global BBH_2_L_hat
-    BBH_2_L_hat[0] = L_hat[0]
-    BBH_2_L_hat[1] = L_hat[1]
-    BBH_2_L_hat[2] = L_hat[2]
+    L_hat = unit_mutual_orbital_angular_momentum(BBH_2, BBH_1)
 
     binary_orbit = BBH_2.calculate_orbit(primary = BBH_1)
 
@@ -82,12 +65,9 @@ def spin_ode_update(ode, ds_dt, s_hat, t):
     mu = BBH_1.m * BBH_2.m / (BBH_1.m + BBH_2.m)
     m2 = BBH_2.m
 
-    ds_dt_vector = ((3 * G * n * (m2 + mu/3)) / (2 * c**2 * a2)) * np.cross(L_hat, s_hat)
+    ds_dt_vector = ((3 * G * n * (m2 + mu/3)) / (2 * c**2 * a2)) * np.cross(L_hat, unit_spin_vector)
 
-    ds_dt[0] = ds_dt_vector[0]
-    ds_dt[1] = ds_dt_vector[1]
-    ds_dt[2] = ds_dt_vector[2]
-
+    ds_dt[0], ds_dt[1], ds_dt[2] = ds_dt_vector.tolist()
 
 spin_ode.derivatives = spin_ode_update
 
@@ -142,26 +122,25 @@ initialize_data_collection()
 
 while sim.t <= 10**5 * SMBH_period:
 
-    check_and_assign_minimums(sim, outcome_record)
+    check_and_assign_minimums(sim)
 
-    global total_time_steps_completed
-    if total_time_steps_completed % 100 == 0:
+    if config.total_time_steps_completed % 100 == 0:
         save_data(sim)
 
-    check_bound(sim, outcome_record)
-    check_for_collisions(sim, w, outcome_record)
+    check_bound(sim)
+    check_for_collisions(sim, w)
 
-    total_time_steps_completed += 1
+    config.total_time_steps_completed += 1
     sim.step()
 
 #####################################################################################
 
 if is_bound(sim.particles[1], sim.particles[2]):
-    outcome_record["Result"] = "Ended with no mergers, bound binary, and all particles within limit to SMBH"
+    config.outcome_record["Result"] = "Ended with no mergers, bound binary, and all particles within limit to SMBH"
 else:
-    outcome_record["Result"] = "Ended with no mergers, unbound binary, and all particles within limit to SMBH"
+    config.outcome_record["Result"] = "Ended with no mergers, unbound binary, and all particles within limit to SMBH"
 
-save_final_data(outcome_record, sim)
-dump_record(outcome_record)
+save_final_data(sim)
+dump_record()
 
 
