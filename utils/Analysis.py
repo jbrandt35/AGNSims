@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import json
 import pandas as pd
+import sys
 import seaborn as sns
 from itertools import cycle
 import matplotlib as mpl
@@ -32,7 +33,7 @@ def retrieve_data(run_directory, data_name, data_location, source):
                 data = "Run Didn't Finish"
             #If trying to access data that doesn't exist, throw an error
             else:
-                raise FileNotFoundError[f"The file {os.path.join(run_directory, 'outcome.json')} couldn't be opened"]
+                raise FileNotFoundError(f"The file {os.path.join(run_directory, 'outcome.json')} couldn't be opened")
     return data
 
 
@@ -41,12 +42,17 @@ def run_ended_in_merger(directory):
 
 
 #Returns whether BBH_1 and BBH_2 shared a bounded orbit at the end of the simulation
-def run_ended_with_bound_binary(directory):
+def run_ended_with_bound_binary(directory, quiet = False):
     # Preferably, pull it from outcome.json
     try:
         final_eccentricity = retrieve_data(directory, "Final Binary Eccentricity", None, "outcome_file")
     # If not available there, take the last recorded eccentricity
+    except FileNotFoundError:
+        if not quiet:
+            print(f"Couldn't find the final binary eccentricity in {directory}/outcome.json, since it doesn't exist. Using last saved value from {directory}/result/data.h5.")
+        final_eccentricity = retrieve_data(directory, "binary eccentricity", "Misc", "data_file")[-1]
     except KeyError:
+        print(f"Couldn't find the final binary eccentricity in {directory}/outcome.json, even though the file exists. Using last saved value from {directory}/result/data.h5.")
         final_eccentricity = retrieve_data(directory, "binary eccentricity", "Misc", "data_file")[-1]
     return bool(final_eccentricity < 1)
 
@@ -63,27 +69,30 @@ def get_data_values(data_name, i, data_location = None, source = "data_file", on
             for run_number in os.listdir(os.path.join(f"BBH_separation_{BBH_separation}", f"perturber_separation_{perturber_separation}")):
                 directory = os.path.join(f"BBH_separation_{BBH_separation}", f"perturber_separation_{perturber_separation}", run_number)
 
-                run_is_unfinished = not run_finished(directory)
+                run_is_finished = run_finished(directory)
+                run_is_unfinished = not run_is_finished
+
+                #Don't complain about not being able to find final conditions if just making the pie chart
+                quiet = False
+                if sys._getframe().f_back.f_code.co_name == "generate_outcome_piechart":
+                    quiet = True
 
                 #Skip this run if only want finished runs and this one isn't finished
                 if only_include_finished and run_is_unfinished:
                     continue
 
-                #If the run finished, evaluate the ending conditions
-                if not run_is_unfinished:
+                run_ended_merged = run_ended_in_merger(directory)
+                binary_ended_unbound = not run_ended_with_bound_binary(directory, quiet = quiet)
 
-                    run_ended_merged = run_ended_in_merger(directory)
-                    binary_ended_unbound = not run_ended_with_bound_binary(directory)
-
-                    #Skip this run if only want merged runs and this one isn't merged
-                    if only_include_merged and not run_ended_merged:
-                        continue
-                    #Skip this run if only want un-merged and this one ended merged
-                    if exclude_merged and run_ended_merged:
-                        continue
-                    #Skip this run if only want bound binaries and this one ended unbound
-                    if exclude_unbound_binaries and binary_ended_unbound:
-                        continue
+                #Skip this run if only want merged runs and this one isn't merged
+                if only_include_merged and not run_ended_merged:
+                    continue
+                #Skip this run if only want un-merged and this one ended merged
+                if exclude_merged and run_ended_merged:
+                    continue
+                #Skip this run if only want bound binaries and this one ended unbound
+                if exclude_unbound_binaries and binary_ended_unbound:
+                    continue
 
                 data = retrieve_data(directory, data_name, data_location, source)
 
@@ -179,6 +188,9 @@ create_histogram(get_ith_inclinations(-1, "L_Binary", "Positions/binary", "L_BBH
 
 initial_t_GW_values = get_data_values("t_GW", 0, data_location = "Positions/binary", exclude_merged = True, exclude_unbound_binaries = True)
 print(initial_t_GW_values)
+
+final_e = get_data_values("binary eccentricity", -1, data_location = "Misc", exclude_merged = True, exclude_unbound_binaries = True)
+print(final_e)
 
 
 
