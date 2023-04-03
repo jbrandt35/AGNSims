@@ -6,8 +6,7 @@ from astropy import constants
 import pandas as pd
 import os
 import config
-import reboundx
-import h5py
+
 
 data_objects = ["BBH_1", "BBH_2", "SMBH", "perturber"]
 
@@ -117,7 +116,7 @@ def unit_mutual_orbital_angular_momentum(particle_1, particle_2):
 #SMBH_a in units of Gravitational Radii, binary_separation in units of m1 Hill radii, perturber_a in units of m1+m2 Hill radii
 #Returns w - for calculating mergers between m1 and m2
 #Each particle is hashed with a name useful for other functions - i.e. see period calculation functions
-def populate_simulation(sim, binary_separation = 0.1, binary_eccentricity = 0, binary_M = 0, binary_inc = 0, SMBH_a = 1000, SMBH_eccentricity = 0, SMBH_M = 0, SMBH_inc = 0, perturber_a = 20, perturber_e = 0, perturber_M = 0, perturber_inc = 0, randomize_M = False, ignore_perturber = False, randomize_eccentricities = False):
+def populate_simulation(sim, binary_separation = 0.1, binary_eccentricity = 0, binary_M = 0, binary_inc = 0, SMBH_a = 1000, SMBH_eccentricity = 0, SMBH_M = 0, SMBH_inc = 0, perturber_a = 20, perturber_e = 0, perturber_M = 0, perturber_inc = 0, randomize_M = False, ignore_perturber = False, randomize_eccentricities = False, randomize_binary_inc = False):
 
     #Calculate Gravitational Radius and convert units of SMBH_a
     Rg = sim.G * m0 / c ** 2
@@ -134,6 +133,8 @@ def populate_simulation(sim, binary_separation = 0.1, binary_eccentricity = 0, b
         SMBH_eccentricity = sample_eccentricity_distribution()
         binary_eccentricity = sample_eccentricity_distribution()
         perturber_e = sample_eccentricity_distribution()
+    if randomize_binary_inc:
+        binary_inc = sample_inclination_distribution()
 
     #Add the SMBH to the sim
     sim.add(m = m0, hash = "SMBH")
@@ -169,7 +170,7 @@ def populate_simulation(sim, binary_separation = 0.1, binary_eccentricity = 0, b
         sim.add(primary = sim.particles["SMBH"], m = m2, a = perturber_a, e = perturber_e, M = perturber_M, inc = perturber_inc, hash = "perturber")
     else:
         #Add perturber as test particle
-        sim.add(primary=sim.particles["SMBH"], a=perturber_a, e=perturber_e, M=perturber_M, inc=perturber_inc, hash="perturber")
+        sim.add(primary=sim.particles["SMBH"], a = perturber_a, e = perturber_e, M = perturber_M, inc = perturber_inc, hash = "perturber")
         sim.N_active = 3
 
     #Move to COM frame of simulation
@@ -179,6 +180,8 @@ def populate_simulation(sim, binary_separation = 0.1, binary_eccentricity = 0, b
         config.spin = unit_mutual_orbital_angular_momentum(sim.particles["BBH_2"], sim.particles["BBH_1"])
     elif config.mode == "initial_spin_aligned_with_L_of_Binary":
         config.spin = np.array([0, 0, 1])
+
+    config.outcome_record["Initial Inclination of BBH_2 around BBH_1"] = np.degrees(binary_inc)
 
     return np.sqrt(sim.G * m0 / SMBH_a) - np.sqrt(sim.G * m0 / perturber_a) + np.sqrt(
         sim.G * (m1_a + m1_b) / (binary_separation ** 3)) * binary_separation * (m1_b/(m1_a+m1_b))
@@ -236,23 +239,23 @@ def system_ejected(primary, secondary, limit):
     d = dist_between(primary, secondary)
     return bool(d > limit)
 
+def save_initial_data(sim):
+    config.outcome_record["Initial t_GW"] = t_GW(sim)
+
 def save_final_data(sim):
 
-    config.outcome_record["Final t_GW"] = t_GW(sim)
-    config.outcome_record["Final Binary Eccentricity"] = sim.particles['BBH_2'].calculate_orbit(primary=sim.particles['BBH_1']).e
-    config.outcome_record["Final Binary Semimaj"] = sim.particles['BBH_2'].calculate_orbit(primary=sim.particles['BBH_1']).a
-    config.outcome_record["Final SMBH xyz"] = sim.particles['SMBH'].xyz
-    config.outcome_record["Final SMBH vxyz"] = sim.particles['SMBH'].vxyz
-    config.outcome_record["Final BBH_1 xyz"] = sim.particles['BBH_1'].xyz
-    config.outcome_record["Final BBH_1 vxyz"] = sim.particles['BBH_1'].vxyz
-    config.outcome_record["Final BBH_2 xyz"] = sim.particles['BBH_2'].xyz
-    config.outcome_record["Final BBH_2 vxyz"] = sim.particles['BBH_2'].vxyz
-    config.outcome_record["Final Perturber xyz"] = sim.particles['perturber'].xyz
-    config.outcome_record["Final Perturber vxyz"] = sim.particles['perturber'].vxyz
+    binary_orbit = sim.particles["BBH_2"].calculate_orbit(primary = sim.particles["BBH_1"])
+    final_binary_eccentricity = binary_orbit.e
+
+    final_t_GW = t_GW(sim)
+
+    config.outcome_record["Final t_GW"] = final_t_GW
+    config.outcome_record["Final Binary Eccentricity"] = final_binary_eccentricity
+    config.outcome_record["Final Binary Semimaj"] = binary_orbit.a
 
 def check_for_collisions(sim, w):
 
-    ##############Check Binary Orbits###############
+    ##############Check Binary Orbit for Event Horizon Crossings###############
 
     BH_a = sim.particles["BBH_1"]
     BH_b = sim.particles["BBH_2"]
@@ -267,19 +270,29 @@ def check_for_collisions(sim, w):
         save_final_data(sim)
         dump_record()
         raise CollisionException(config.outcome_record["Result"])
+    elif orbit.e < 1:
+        t_gw = t_GW(sim)
+        if t_gw < period:
+            config.outcome_record["Result"] = f"At t = {sim.t}, t_GW was {t_gw} when the period was {period}."
+            raise CollisionException(config.outcome_record["Result"])
 
-    #no longer ending the simulation if t_GW < period
-    # elif orbit.e < 1:
-    #     t_gw = t_GW(sim)
-    #     if t_gw < period:
-    #         record["Result"] = f"Collision Encountered: t_GW was {t_gw} when the period was {period}."
-    #         save_final_data(record, sim)
-    #         dump_record(record)
-    #         raise CollisionException(record["Result"])
-
-    ##############Check Perturber Orbits###############
+    ##############Check Perturber-Binary BBH Orbits for Event Horizon Crossings###############
 
     perturber = sim.particles["perturber"]
+
+    for BBH in [BH_a, BH_b]:
+
+        sum_of_event_horizons = 2 * sim.G * (perturber.m + BBH.m) / (c ** 2)
+        distance = perturber.calculate_orbit(primary = BBH).d
+
+        if distance < sum_of_event_horizons:
+            config.outcome_record["Result"] = f"Collision Encountered: The distance between the perturber and a BBH was {distance} AU when the sum of event horizon radii was {sum_of_event_horizons} AU."
+            save_final_data(sim)
+            dump_record()
+            raise CollisionException(config.outcome_record["Result"])
+
+
+    ##############Check Perturber Orbit Flags###############
 
     n = (BH_a.m * perturber.m) / ((BH_a.m + perturber.m)**2)
     M_tot = BH_a.m + perturber.m
@@ -294,14 +307,10 @@ def check_for_collisions(sim, w):
     m1_b_distance = perturber.calculate_orbit(primary = BH_b).d
 
     if m1_a_distance < r_p:
-        config.outcome_record["Result"] = f"Collision Encountered: The distance between m1_a and m2 was {m1_a_distance} AU when r_p was {r_p} AU."
-        dump_record()
-        raise CollisionException(config.outcome_record["Result"])
+        config.outcome_record["Events"].append(f"At t = {sim.t}, the distance between m1_a and m2 was {m1_a_distance} AU when r_p was {r_p} AU.")
 
     if m1_b_distance < r_p:
-        config.outcome_record["Result"] = f"Collision Encountered: The distance between m1_b and m2 was {m1_b_distance} AU when r_p was {r_p} AU."
-        dump_record()
-        raise CollisionException(config.outcome_record["Result"])
+        config.outcome_record["Events"].append(f"At t = {sim.t}, the distance between m1_b and m2 was {m1_b_distance} AU when r_p was {r_p} AU.")
 
 def check_bound(sim):
 

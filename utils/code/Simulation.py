@@ -1,11 +1,12 @@
 from Tools import *
 import numpy as np
+import reboundx
 import config
 
 ############################   Settings    ###########################################
 
-perturber_a = 5
-binary_separation = 0.5
+perturber_a = PERTSEPARATION
+binary_separation = BINSEPARATION
 
 config.mode = "initial_spin_aligned_with_L_of_Binary"
 
@@ -21,7 +22,7 @@ tau_mig = 1e5
 ##############################    Initializing   #####################################
 
 sim = create_simulation()
-w = populate_simulation(sim, perturber_a = perturber_a, binary_separation = binary_separation, ignore_perturber = False, randomize_M = True, binary_inc = config.inclination_of_binary)
+w = populate_simulation(sim, perturber_a = perturber_a, binary_separation = binary_separation, randomize_M = True, randomize_binary_inc = True, randomize_eccentricities = True)
 
 binary_period, SMBH_period, perturber_period = get_binary_period(sim), get_binary_SMBH_period(sim), get_perturber_period(sim)
 sim.dt = 0.05 * binary_period
@@ -38,9 +39,9 @@ gr_radiation.params["gr_rad_part1"] = 1
 gr_radiation.params["gr_rad_part2"] = 2
 
 #1 PN
-gr_full = rebx.load_force("gr_full")
-rebx.add_force(gr_full)
-gr_full.params["c"] = c
+# gr_full = rebx.load_force("gr_full")
+# rebx.add_force(gr_full)
+# gr_full.params["c"] = c
 
 ##############################    Tracking Spin   #####################################
 
@@ -119,6 +120,7 @@ if include_rebound_migration:
 #####################################################################################
 
 initialize_data_collection()
+save_initial_data(sim)
 
 while sim.t <= 10**5 * SMBH_period:
 
@@ -135,7 +137,7 @@ while sim.t <= 10**5 * SMBH_period:
 
 #####################################################################################
 
-if is_bound(sim.particles[1], sim.particles[2]):
+if is_bound(sim.particles["BBH_1"], sim.particles["BBH_2"]):
     config.outcome_record["Result"] = "Ended with no mergers, bound binary, and all particles within limit to SMBH"
 else:
     config.outcome_record["Result"] = "Ended with no mergers, unbound binary, and all particles within limit to SMBH"
