@@ -8,6 +8,8 @@ mode = None
 
 total_time_steps_completed = 0
 
+bound_pairs = [("BBH_1", "BBH_2")]
+
 
 outcome_record = {"Result": None, "Minimum Distance Between Binary COM and Perturber": np.inf,
                   "Minimum Distance Between BBHs": np.inf, "Minimum t_GW": np.inf, "Minimum relative t_GW": np.inf, "Events": []}

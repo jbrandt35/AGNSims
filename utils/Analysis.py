@@ -36,28 +36,12 @@ def retrieve_data(run_directory, data_name, data_location, source):
                 raise FileNotFoundError(f"The file {os.path.join(run_directory, 'outcome.json')} couldn't be opened")
     return data
 
-
+#Returns whether ORIGINAL binary ends merged
 def run_ended_in_merger(directory):
-    return "Collision Encountered" in retrieve_data(directory, "Result", None, "outcome_file")
+    return "GW Collision" in retrieve_data(directory, "Result", None, "outcome_file")
 
-
-#Returns whether BBH_1 and BBH_2 shared a bounded orbit at the end of the simulation
-def run_ended_with_bound_binary(directory, quiet = False):
-    # Preferably, pull it from outcome.json
-    try:
-        final_eccentricity = retrieve_data(directory, "Final Binary Eccentricity", None, "outcome_file")
-    # If not available there, take the last recorded eccentricity
-    except FileNotFoundError:
-        if not quiet:
-            print(f"Couldn't find the final binary eccentricity in {directory}/outcome.json, since it doesn't exist. Using last saved value from {directory}/result/data.h5.")
-        final_eccentricity = retrieve_data(directory, "binary eccentricity", "Misc", "data_file")[-1]
-    except KeyError:
-        print(f"Couldn't find the final binary eccentricity in {directory}/outcome.json, even though the file exists. Using last saved value from {directory}/result/data.h5.")
-        final_eccentricity = retrieve_data(directory, "binary eccentricity", "Misc", "data_file")[-1]
-    return bool(final_eccentricity < 1)
-
-
-def get_data_values(data_name, i, data_location = None, source = "data_file", only_include_finished = True, only_include_merged = False, exclude_merged = False, exclude_unbound_binaries = False):
+#
+def get_data_values(data_name, i, data_location = None, source = "data_file", only_include_finished = True, only_include_merged = False, exclude_merged = False):
     values = []
 
     for BBH_separation in [float(directory.split("_")[-1]) for directory in os.listdir() if "BBH_separation" in directory]:
@@ -81,18 +65,14 @@ def get_data_values(data_name, i, data_location = None, source = "data_file", on
                 if only_include_finished and run_is_unfinished:
                     continue
 
-                run_ended_merged = run_ended_in_merger(directory)
-                binary_ended_unbound = not run_ended_with_bound_binary(directory, quiet = quiet)
-
                 #Skip this run if only want merged runs and this one isn't merged
-                if only_include_merged and not run_ended_merged:
-                    continue
+                if only_include_merged:
+                    if not run_ended_in_merger(directory):
+                        continue
                 #Skip this run if only want un-merged and this one ended merged
-                if exclude_merged and run_ended_merged:
-                    continue
-                #Skip this run if only want bound binaries and this one ended unbound
-                if exclude_unbound_binaries and binary_ended_unbound:
-                    continue
+                if exclude_merged:
+                    if run_ended_in_merger(directory):
+                        continue
 
                 data = retrieve_data(directory, data_name, data_location, source)
 
@@ -182,19 +162,7 @@ def generate_outcome_piechart():
 generate_outcome_piechart()
 
 #Create Spin Histograms
-create_histogram(get_ith_inclinations(-1, "S", "Positions/binary", "L_Binary", "Positions/binary"), title = "Final Inclination of Spin to Binary-SMBH L", x_label = "Inclination [deg]", y_label = "Distribution")
-create_histogram(get_ith_inclinations(-1, "S", "Positions/binary", "L_BBH2", "Positions/binary"), title = "Final Inclination of Spin to $m1_b$-$m1_a$ L", x_label = "Inclination [deg]", y_label = "Distribution")
-create_histogram(get_ith_inclinations(-1, "L_Binary", "Positions/binary", "L_BBH2", "Positions/binary"), title = "Final Inclination of Binary-SMBH L to $m1_b$-$m1_a$ L", x_label = "Inclination [deg]", y_label = "Distribution")
-
-initial_t_GW_values = get_data_values("t_GW", 0, data_location = "Positions/binary", exclude_merged = True, exclude_unbound_binaries = True)
-print(initial_t_GW_values)
-
-final_e = get_data_values("binary eccentricity", -1, data_location = "Misc", exclude_merged = True, exclude_unbound_binaries = True)
-print(final_e)
-
-
-
-
-
-
-
+# create_histogram(get_ith_inclinations(-1, "S", "Positions/binary", "L_Binary", "Positions/binary"), title = "Final Inclination of Spin to Binary-SMBH L", x_label = "Inclination [deg]", y_label = "Distribution")
+# create_histogram(get_ith_inclinations(-1, "S", "Positions/binary", "L_BBH2", "Positions/binary"), title = "Final Inclination of Spin to $m1_b$-$m1_a$ L", x_label = "Inclination [deg]", y_label = "Distribution")
+# create_histogram(get_ith_inclinations(-1, "L_Binary", "Positions/binary", "L_BBH2", "Positions/binary"), title = "Final Inclination of Binary-SMBH L to $m1_b$-$m1_a$ L", x_label = "Inclination [deg]", y_label = "Distribution")
+#

@@ -38,39 +38,35 @@ gr_radiation.params["c"] = c
 gr_radiation.params["gr_rad_part1"] = 1
 gr_radiation.params["gr_rad_part2"] = 2
 
-#1 PN
-# gr_full = rebx.load_force("gr_full")
-# rebx.add_force(gr_full)
-# gr_full.params["c"] = c
 
 ##############################    Tracking Spin   #####################################
 
 sim.integrator = "BS"
 
-spin_ode = sim.create_ode(length = 3, needs_nbody = True)
-spin_ode.y[0], spin_ode.y[1], spin_ode.y[2] = config.spin.tolist()
+# spin_ode = sim.create_ode(length = 3, needs_nbody = True)
+# spin_ode.y[0], spin_ode.y[1], spin_ode.y[2] = config.spin.tolist()
+#
+# def spin_ode_update(ode, ds_dt, s_hat, t):
+#
+#     unit_spin_vector = np.array([s_hat[0], s_hat[1], s_hat[2]])
+#     config.spin = np.copy(unit_spin_vector)
+#
+#     BBH_1, BBH_2 = sim.particles["BBH_1"], sim.particles["BBH_2"]
+#     L_hat = unit_mutual_orbital_angular_momentum(BBH_2, BBH_1)
+#
+#     binary_orbit = BBH_2.calculate_orbit(primary = BBH_1)
+#
+#     n = binary_orbit.n
+#     G = sim.G
+#     a2 = binary_orbit.a
+#     mu = BBH_1.m * BBH_2.m / (BBH_1.m + BBH_2.m)
+#     m2 = BBH_2.m
+#
+#     ds_dt_vector = ((3 * G * n * (m2 + mu/3)) / (2 * c**2 * a2)) * np.cross(L_hat, unit_spin_vector)
+#
+#     ds_dt[0], ds_dt[1], ds_dt[2] = ds_dt_vector.tolist()
 
-def spin_ode_update(ode, ds_dt, s_hat, t):
-
-    unit_spin_vector = np.array([s_hat[0], s_hat[1], s_hat[2]])
-    config.spin = np.copy(unit_spin_vector)
-
-    BBH_1, BBH_2 = sim.particles["BBH_1"], sim.particles["BBH_2"]
-    L_hat = unit_mutual_orbital_angular_momentum(BBH_2, BBH_1)
-
-    binary_orbit = BBH_2.calculate_orbit(primary = BBH_1)
-
-    n = binary_orbit.n
-    G = sim.G
-    a2 = binary_orbit.a
-    mu = BBH_1.m * BBH_2.m / (BBH_1.m + BBH_2.m)
-    m2 = BBH_2.m
-
-    ds_dt_vector = ((3 * G * n * (m2 + mu/3)) / (2 * c**2 * a2)) * np.cross(L_hat, unit_spin_vector)
-
-    ds_dt[0], ds_dt[1], ds_dt[2] = ds_dt_vector.tolist()
-
-spin_ode.derivatives = spin_ode_update
+# spin_ode.derivatives = spin_ode_update
 
 
 ##############################   Drag Effects   #####################################
@@ -128,6 +124,7 @@ while sim.t <= 10**5 * SMBH_period:
 
     if config.total_time_steps_completed % 100 == 0:
         save_data(sim)
+        check_for_binary_swaps(sim)
 
     check_bound(sim)
     check_for_collisions(sim, w)

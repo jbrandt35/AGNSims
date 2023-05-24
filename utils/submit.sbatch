@@ -2,7 +2,7 @@
 
 #SBATCH -JNAME
 #SBATCH --account=hive-gli323
-#SBATCH -t150:00:00
+#SBATCH -t23:00:00
 #SBATCH -phive
 #SBATCH -ooutput.out
 

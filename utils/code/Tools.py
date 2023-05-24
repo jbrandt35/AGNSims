@@ -6,6 +6,7 @@ from astropy import constants
 import pandas as pd
 import os
 import config
+import copy
 
 
 data_objects = ["BBH_1", "BBH_2", "SMBH", "perturber"]
@@ -273,8 +274,11 @@ def check_for_collisions(sim, w):
     elif orbit.e < 1:
         t_gw = t_GW(sim)
         if t_gw < period:
-            config.outcome_record["Result"] = f"At t = {sim.t}, t_GW was {t_gw} when the period was {period}."
+            config.outcome_record["Result"] = f"GW Collision: At t = {sim.t}, t_GW was {t_gw} when the period was {period}."
+            save_final_data(sim)
+            dump_record()
             raise CollisionException(config.outcome_record["Result"])
+
 
     ##############Check Perturber-Binary BBH Orbits for Event Horizon Crossings###############
 
@@ -340,8 +344,8 @@ def check_bound(sim):
             dump_record()
         else:
             record["Result"] = f"Ejected: BBH_2 left the system without replacement, BBH_1 + pertuber ecc: {BBH_1.calculate_orbit(primary = perturber).e}"
-            dump_record()
             save_final_data(sim)
+            dump_record()
         raise UnboundException(record["Result"])
 
     if system_ejected(SMBH, perturber, limit):
@@ -452,12 +456,29 @@ def dump_record():
         json.dump(config.outcome_record, file)
     save_data_to_disk()
 
+def check_for_binary_swaps(sim):
+    updated_bound_pairs = []
+    interacting_BHs = ["BBH_1", "BBH_2", "perturber"]
+    for object_a, object_b in zip(interacting_BHs, interacting_BHs[1:]):
+        if is_bound(sim.particles[object_a], sim.particles[object_b]):
+            pair = (object_a, object_b)
+            updated_bound_pairs.append(pair)
+    if not set(updated_bound_pairs) == set(config.bound_pairs):
+        new_event = f"Swap Event: At t = {sim.t}, the bound pairs went from {config.bound_pairs} to {updated_bound_pairs}."
+        config.bound_pairs = copy.deepcopy(updated_bound_pairs)
+        for (object_a, object_b) in updated_bound_pairs:
+            orbit = sim.particles[object_a].calculate_orbit(primary = sim.particles[object_b])
+            new_event += f" The orbit ({object_a}, {object_b}) has a = {orbit.a} AU and e = {orbit.e}."
+        config.outcome_record["Events"].append(new_event)
 
 class UnboundException(Exception):
     pass
 
 
 class CollisionException(Exception):
+    pass
+
+class SwapException(Exception):
     pass
 
 

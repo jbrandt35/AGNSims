@@ -4,9 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="38bd1f9c-21cd-4995-a960-13f4deefe81a" name="Changes" comment="Merged new stopping conditions into master">
+    <list default="true" id="38bd1f9c-21cd-4995-a960-13f4deefe81a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/Analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/Analysis.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/code/Simulation.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/code/Simulation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/code/Tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/code/Tools.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/code/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/code/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/submit.sbatch" beforeDir="false" afterPath="$PROJECT_DIR$/utils/submit.sbatch" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,6 +73,7 @@
     &quot;WebServerToolWindowPanel.toolwindow.show.date&quot;: &quot;false&quot;,
     &quot;WebServerToolWindowPanel.toolwindow.show.permissions&quot;: &quot;false&quot;,
     &quot;WebServerToolWindowPanel.toolwindow.show.size&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
     &quot;last_opened_file_path&quot;: &quot;/Users/josh/PycharmProjects/AGNMergers/utils/MergeCleaner&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -166,6 +171,24 @@
       <workItem from="1679960854807" duration="2910000" />
       <workItem from="1680124699151" duration="767000" />
       <workItem from="1680484201954" duration="4842000" />
+      <workItem from="1680712430767" duration="8000" />
+      <workItem from="1680895691011" duration="4872000" />
+      <workItem from="1681601765279" duration="1045000" />
+      <workItem from="1681828457080" duration="3426000" />
+      <workItem from="1682086856680" duration="13000" />
+      <workItem from="1682275995063" duration="10480000" />
+      <workItem from="1682805060355" duration="5837000" />
+      <workItem from="1683580629103" duration="562000" />
+      <workItem from="1683834091505" duration="55000" />
+      <workItem from="1683834154500" duration="730000" />
+      <workItem from="1684019442873" duration="8000" />
+      <workItem from="1684019478720" duration="673000" />
+      <workItem from="1684248333865" duration="3000" />
+      <workItem from="1684248372350" duration="1162000" />
+      <workItem from="1684774872561" duration="685000" />
+      <workItem from="1684779012197" duration="13286000" />
+      <workItem from="1684853661894" duration="7794000" />
+      <workItem from="1684894661231" duration="309000" />
     </task>
     <task id="LOCAL-00003" summary="Updating Code and Repo">
       <created>1671912465486</created>
@@ -321,7 +344,14 @@
       <option name="project" value="LOCAL" />
       <updated>1678243447816</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="adding feature to be able to get final values even if run didn't finish">
+      <created>1680490947390</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1680490947390</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -356,25 +386,26 @@
     <MESSAGE value="Added distributions for inclination and eccentricity based on Secunda et al" />
     <MESSAGE value="Used config.py to eliminate need for a bunch of shared global variables" />
     <MESSAGE value="Merged new stopping conditions into master" />
-    <option name="LAST_COMMIT_MESSAGE" value="Merged new stopping conditions into master" />
+    <MESSAGE value="adding feature to be able to get final values even if run didn't finish" />
+    <option name="LAST_COMMIT_MESSAGE" value="adding feature to be able to get final values even if run didn't finish" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/AGNMergers$OrbitalElementConvert.coverage" NAME="Simulation Coverage Results" MODIFIED="1654800360981" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/AGNMergers$UPC.coverage" NAME="UPC Coverage Results" MODIFIED="1667775376325" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/AGNMergers$config.coverage" NAME="config Coverage Results" MODIFIED="1678240933512" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/utils/code" />
-    <SUITE FILE_PATH="coverage/AGNMergers$PostProc.coverage" NAME="PostProc Coverage Results" MODIFIED="1678243333279" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/utils/code" />
     <SUITE FILE_PATH="coverage/AGNMergers$Test.coverage" NAME="Test Coverage Results" MODIFIED="1667772388158" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/AGNMergers$plotTraj.coverage" NAME="plotTraj Coverage Results" MODIFIED="1662424262287" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ToyProblem" />
+    <SUITE FILE_PATH="coverage/AGNMergers$PostProc.coverage" NAME="PostProc Coverage Results" MODIFIED="1678243333279" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/utils/code" />
     <SUITE FILE_PATH="coverage/AGNMergers$Earth_Moon_Sun.coverage" NAME="Earth-Moon-Sun Coverage Results" MODIFIED="1654005080462" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/AGNMergers$Analysis.coverage" NAME="Analysis Coverage Results" MODIFIED="1669588917720" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/" />
+    <SUITE FILE_PATH="coverage/AGNMergers$Tools.coverage" NAME="Tools Coverage Results" MODIFIED="1678242419370" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/utils/code" />
     <SUITE FILE_PATH="coverage/AGNMergers$SpinPlotter.coverage" NAME="SpinPlotter Coverage Results" MODIFIED="1667868851283" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/AGNMergers$Simulation.coverage" NAME="Simulation Coverage Results" MODIFIED="1678296886946" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/utils/code" />
-    <SUITE FILE_PATH="coverage/AGNMergers$fiducial.coverage" NAME="fiducial Coverage Results" MODIFIED="1653416099409" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/AGNMergers$Tools.coverage" NAME="Tools Coverage Results" MODIFIED="1678242419370" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/utils/code" />
-    <SUITE FILE_PATH="coverage/AGNMergers$HW.coverage" NAME="HW Coverage Results" MODIFIED="1667577494440" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/AGNMergers$Elements.coverage" NAME="Elements Coverage Results" MODIFIED="1667779879001" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/AGNMergers$AstroHW.coverage" NAME="AstroHW Coverage Results" MODIFIED="1674616850322" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/AGNMergers$plotTraj.coverage" NAME="plotTraj Coverage Results" MODIFIED="1662424262287" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ToyProblem" />
-    <SUITE FILE_PATH="coverage/AGNMergers$AGN_binary.coverage" NAME="AGN_binary Coverage Results" MODIFIED="1656013167533" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/AGNMergers$Analysis.coverage" NAME="Analysis Coverage Results" MODIFIED="1669588917720" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="/" />
+    <SUITE FILE_PATH="coverage/AGNMergers$fiducial.coverage" NAME="fiducial Coverage Results" MODIFIED="1653416099409" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/AGNMergers$HW.coverage" NAME="HW Coverage Results" MODIFIED="1667577494440" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/AGNMergers$config.coverage" NAME="config Coverage Results" MODIFIED="1678240933512" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/utils/code" />
     <SUITE FILE_PATH="coverage/AGNMergers$PeterExample.coverage" NAME="PeterExample Coverage Results" MODIFIED="1669245870622" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/AGNMergers$Elements.coverage" NAME="Elements Coverage Results" MODIFIED="1667779879001" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/AGNMergers$OrbitalElementConvert.coverage" NAME="Simulation Coverage Results" MODIFIED="1654800360981" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/AGNMergers$AGN_binary.coverage" NAME="AGN_binary Coverage Results" MODIFIED="1656013167533" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
